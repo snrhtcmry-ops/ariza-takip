@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fabrika Teknik Servis & Arıza Takip</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#D3D8DC;--panel:#EBEEF0;--field:#F7F8F9;--ink:#1E252A;--muted:#566169;--line:#BCC4CA;--bar:#262D33;--bar-ink:#E9EDF0;
+  --amber:#E3A008;--amber-t:#F3E4BD;
+  --blue:#2F6FDE;--blue-t:#D5E1F6;
+  --orange:#D9480F;--orange-t:#F4D9CA;
+  --purple:#8E44CF;--purple-t:#E3D6F1;
+  --green:#1F8A4C;--green-t:#D0E9D9;
+  --red:#C62828;
+}
+*{box-sizing:border-box;font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.4;padding-bottom:30px}
+.container{max-width:1050px;margin:auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+.hidden{display:none!important}
+.row,.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* üst çubuk */
+.header{background:var(--bar);color:var(--bar-ink);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.header h1{font-size:1.1rem;margin:0;font-weight:750;letter-spacing:.2px}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.navbtn{border:0;border-radius:9px;padding:10px 14px;font-size:.92rem;font-weight:650;cursor:pointer;background:transparent;color:#C5CDD3}
+.navbtn:hover{background:#38424A}
+.navbtn.active{background:var(--panel);color:var(--ink)}
+
+/* bağlantı durumu */
+.statusline{padding:8px 12px;border-radius:9px;background:var(--panel);border:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+.statusline.ok{background:var(--green-t);border-color:#9FCDB0;color:#14532D}
+.statusline.warn{background:var(--amber-t);border-color:#DDC27A;color:#6B4A00}
+.statusline.err{background:#F6D3D3;border-color:#DDA0A0;color:#7F1D1D}
+
+/* kartlar, formlar */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card-title{font-weight:750;font-size:1.15rem;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.group{margin-bottom:14px}
+.group label{display:block;font-size:.9rem;font-weight:650;color:var(--muted);margin-bottom:6px}
+.input,select,textarea{width:100%;padding:12px;border:1px solid #A9B3BA;border-radius:9px;background:var(--field);color:var(--ink);font-size:1rem}
+textarea{resize:vertical;min-height:92px}
+.input:focus,select:focus,textarea:focus{outline:3px solid #8FB2F0;border-color:#5C8FE6}
+.muted{font-size:.82rem;color:var(--muted)}
+.btn{border:0;border-radius:9px;padding:10px 14px;min-height:40px;font-size:.9rem;font-weight:650;cursor:pointer;background:#C7CED4;color:var(--ink)}
+.btn:hover{filter:brightness(.96)}
+.btn:focus-visible,.navbtn:focus-visible,.counter:focus-visible{outline:3px solid #1F5FD0;outline-offset:2px}
+.primary{background:var(--bar);color:#fff}
+.success{background:var(--green);color:#fff}
+.danger{background:var(--red);color:#fff}
+.small{padding:7px 11px;min-height:34px;font-size:.82rem}
+.submit{width:100%;min-height:56px;border-radius:12px;font-size:1.05rem;font-weight:800;background:var(--amber);color:#2F2100}
+
+/* durum rakamları */
+.counter-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.counter{border:0;border-radius:12px;padding:12px 12px 10px;text-align:left;cursor:pointer;color:#fff;background:var(--s);display:flex;flex-direction:column;gap:2px}
+.counter span{font-size:.82rem;font-weight:700}
+.counter strong{font-size:2rem;line-height:1.05;font-weight:800}
+.c-bekliyor{--s:var(--amber);color:#2F2100}
+.c-islem{--s:var(--blue)}
+.c-parca{--s:var(--orange)}
+.c-servis{--s:var(--purple)}
+.c-tamam{--s:var(--green)}
+.counter.active{outline:3px solid var(--ink);outline-offset:2px}
+.counter-grid.has-filter .counter:not(.active){opacity:.5}
+
+.tabbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.tab.active{background:var(--bar);color:#fff}
+.searchrow{margin:0 0 12px}
+
+/* arıza kartı */
+.ticket{--s:var(--amber);--t:var(--amber-t);background:var(--t);border:1px solid var(--line);border-left:9px solid var(--s);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
+.ticket[data-status="İşlemde"]{--s:var(--blue);--t:var(--blue-t)}
+.ticket[data-status="Parça Bekliyor"]{--s:var(--orange);--t:var(--orange-t)}
+.ticket[data-status="Servis Bekliyor"]{--s:var(--purple);--t:var(--purple-t)}
+.ticket[data-status="Tamamlandı"]{--s:var(--green);--t:var(--green-t)}
+.ticket-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ticket-id{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ticket-title{font-weight:800;font-size:1.2rem;line-height:1.2;overflow-wrap:anywhere}
+.ticket-no{font-size:.78rem;font-weight:700;color:var(--muted)}
+.ticket-state{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.badge{font-size:.85rem;font-weight:800;color:#fff;border-radius:20px;padding:5px 13px;background:var(--s);white-space:nowrap}
+.ticket[data-status="Bekliyor"] .badge{color:#2F2100}
+.age{font-size:.82rem;font-weight:700;color:var(--muted)}
+.ticket-info{white-space:pre-wrap;line-height:1.45;font-size:1.02rem;overflow-wrap:anywhere}
+.meta{display:flex;gap:6px 16px;flex-wrap:wrap;padding:9px 11px;background:rgba(255,255,255,.5);border-radius:8px;color:var(--muted);font-size:.8rem}
+.meta strong{color:var(--ink)}
+.photos{display:flex;gap:8px;flex-wrap:wrap}
+.photos img{width:84px;height:84px;object-fit:cover;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.history{border-top:1px dashed rgba(0,0,0,.2);padding-top:8px;font-size:.8rem;color:#434E56}
+.history summary{cursor:pointer;font-weight:650}
+.history-item{padding:4px 0;border-bottom:1px solid rgba(0,0,0,.08)}
+.actions{border-top:1px dashed rgba(0,0,0,.2);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.st-islem{background:var(--blue);color:#fff}
+.st-parca{background:var(--orange);color:#fff}
+.st-servis{background:var(--purple);color:#fff}
+.st-tamam{background:var(--green);color:#fff}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);border:2px dashed var(--line);border-radius:12px;font-weight:600}
+
+/* rapor */
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin:12px 0}
+.summary{display:flex;flex-direction:column;gap:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.stat{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat span{display:block;font-size:.8rem;font-weight:650;color:var(--muted)}
+.stat strong{font-size:1.65rem;font-weight:800}
+.stat.tamam{border-left:7px solid var(--green)}
+.stat.acik{border-left:7px solid var(--amber)}
+.bars-title{font-size:.88rem;font-weight:700;margin-bottom:6px}
+.bar-row{display:grid;grid-template-columns:minmax(90px,200px) 1fr 34px;gap:8px;align-items:center;margin-bottom:5px;font-size:.88rem}
+.bar-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{height:12px;background:#C9D0D5;border-radius:6px;overflow:hidden}
+.bar-fill{display:block;height:100%;background:#53626D;border-radius:6px}
+.bar-n{text-align:right;font-weight:700}
+
+.notice{padding:10px 12px;border-radius:8px;background:#DCE6F7;color:#1D4ED8;font-size:.84rem;line-height:1.45}
+.warning{background:var(--amber-t);color:#7A4A00}
+.error{background:#F6D3D3;color:#7F1D1D}
+.ok{background:var(--green-t);color:#14532D}
+
+/* fotoğraf, pencere */
+.photo-box{width:104px;height:104px;border:2px dashed #9AA6AE;background:var(--field);border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer;color:var(--muted);font-size:.8rem;text-align:center}
+.photo-box img{width:100%;height:100%;object-fit:cover}
+.photo-box button{position:absolute;right:4px;top:4px;border:0;border-radius:50%;width:24px;height:24px;background:#111827;color:#fff;cursor:pointer}
+.modal{position:fixed;inset:0;background:#0f172acc;display:flex;align-items:center;justify-content:center;padding:18px;z-index:1000}
+.modal-box{background:var(--panel);border-radius:14px;padding:20px;width:min(540px,100%);max-height:90vh;overflow:auto}
+.modal img{max-width:100%;max-height:78vh;display:block;margin:auto}
+
+@media(max-width:700px){
+  .container{padding:9px;gap:10px}
+  .card{padding:14px}
+  .header h1{font-size:1rem}
+  .nav{width:100%}.nav .navbtn{flex:1;padding:10px 6px;text-align:center}
+  .counter-grid{grid-template-columns:repeat(3,1fr)}
+  .counter strong{font-size:1.75rem}
+  .bar-row{grid-template-columns:minmax(80px,120px) 1fr 30px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <h1>🛠️ Fabrika Teknik Servis & Arıza Takip</h1>
+    <div class="nav">
+      <button class="navbtn active" data-sec="form-section" onclick="showSection('form-section')">＋ Arıza Bildir</button>
+      <button class="navbtn" data-sec="pano-section" onclick="showSection('pano-section')">▤ Bakım Panosu</button>
+      <button class="navbtn" data-sec="rapor-section" onclick="handleReportNav()">▥ Rapor & Excel</button>
+      <button class="navbtn" onclick="openSettings()">⚙ Bağlantı</button>
+    </div>
+  </header>
+  <div id="connectionStatus" class="statusline warn">Veritabanı bağlantısı kontrol ediliyor…</div>
+
+  <section id="form-section" class="card">
+    <div class="card-title">Yeni Arıza Bildirimi</div>
+    <form id="arizaForm" onsubmit="handleFormSubmit(event)">
+      <div class="group"><label for="lokasyonInput">Bölüm / Makine / Lokasyon</label><input class="input" id="lokasyonInput" required list="lokasyonHafiza" placeholder="Örn: DOLUM HATTI 3" oninput="formatUpper(this)"><datalist id="lokasyonHafiza"></datalist></div>
+      <div class="group"><label for="bildirenInput">Bildiren kişi (en az 4 karakter)</label><input class="input" id="bildirenInput" required minlength="4" list="bildirenHafiza" placeholder="Ad Soyad" oninput="formatUpper(this)"><datalist id="bildirenHafiza"></datalist></div>
+      <div class="group"><label for="aciklamaInput">Arıza açıklaması</label><textarea id="aciklamaInput" required spellcheck="true" placeholder="Arızayı ve bulunduğu noktayı anlaşılır şekilde açıklayınız…"></textarea></div>
+      <div class="group"><label>Fotoğraf (isteğe bağlı, en fazla 2 adet)</label><div class="row"><div class="photo-box" onclick="triggerPhotoUpload(1)"><span id="p1-text">📷 Fotoğraf 1</span><img id="p1-img" class="hidden"><button type="button" id="p1-remove" class="hidden" onclick="removePhoto(event,1)">×</button><input id="photo1" type="file" accept="image/*" hidden onchange="handlePhotoSelect(this,1)"></div><div class="photo-box" onclick="triggerPhotoUpload(2)"><span id="p2-text">📷 Fotoğraf 2</span><img id="p2-img" class="hidden"><button type="button" id="p2-remove" class="hidden" onclick="removePhoto(event,2)">×</button><input id="photo2" type="file" accept="image/*" hidden onchange="handlePhotoSelect(this,2)"></div></div><div class="muted" style="margin-top:5px">Fotoğraflar gönderilmeden önce küçültülür.</div></div>
+      <button id="submitBtn" type="submit" class="btn submit">BİLDİRİMİ GÖNDER</button>
+    </form>
+  </section>
+
+  <section id="pano-section" class="card hidden">
+    <div class="card-title"><span>Bakım Yönetim Panosu</span><div class="row"><button class="btn small" onclick="syncAll(true)">↻ Yenile</button><button class="btn small" onclick="toggleUstaLock()"><span id="lockStatusText">Bakımcı Girişi</span></button></div></div>
+    <div class="group"><label for="currentActor">İşlemi yapan teknisyen (her işlemde kaydedilir)</label><input id="currentActor" class="input" list="ustaHafiza" placeholder="Teknisyen adını giriniz, en az 4 karakter" oninput="formatUpper(this)"><datalist id="ustaHafiza"></datalist></div>
+    <div class="counter-grid" id="counterGrid"><button class="counter c-bekliyor" data-st="Bekliyor" onclick="setStatusFilter('Bekliyor')"><span>Bekliyor</span><strong id="countBekliyor">0</strong></button><button class="counter c-islem" data-st="İşlemde" onclick="setStatusFilter('İşlemde')"><span>İşlemde</span><strong id="countIslemde">0</strong></button><button class="counter c-parca" data-st="Parça Bekliyor" onclick="setStatusFilter('Parça Bekliyor')"><span>Parça Bekliyor</span><strong id="countParca">0</strong></button><button class="counter c-servis" data-st="Servis Bekliyor" onclick="setStatusFilter('Servis Bekliyor')"><span>Servis Bekliyor</span><strong id="countServis">0</strong></button><button class="counter c-tamam" data-st="Tamamlandı" onclick="setStatusFilter('Tamamlandı')"><span>Tamamlandı</span><strong id="countTamam">0</strong></button></div>
+    <div class="tabbar"><button id="activeTab" class="btn tab active" onclick="switchArchiveTab(false)">Aktif Arızalar</button><button id="archiveTab" class="btn tab" onclick="switchArchiveTab(true)">Tamamlananlar</button></div>
+    <div class="searchrow"><input id="ticketSearch" class="input" placeholder="Kayıt no, makine veya bildiren ara" oninput="renderTickets()"><input type="hidden" id="statusFilter" value="ALL"></div>
+    <div id="ticketContainer"></div>
+  </section>
+
+  <section id="rapor-section" class="card hidden">
+    <div class="card-title">Raporlama ve Excel Dışa Aktarım <button class="btn small" onclick="syncAll(true)">↻ Verileri yenile</button></div>
+    <div class="filters">
+      <div><label class="muted">Bildirim ayı</label><select id="aySecimi" onchange="updateRaporSummary()"><option value="ALL">Tüm zamanlar</option></select></div>
+      <div><label class="muted">Durum</label><select id="reportStatus" onchange="updateRaporSummary()"><option value="ALL">Tüm durumlar</option><option>Bekliyor</option><option>İşlemde</option><option>Parça Bekliyor</option><option>Servis Bekliyor</option><option>Tamamlandı</option></select></div>
+      <div><label class="muted">Makine / lokasyon</label><input id="reportLocation" class="input" list="lokasyonHafiza" placeholder="Tümü" oninput="updateRaporSummary()"></div>
+      <div><label class="muted">Bildiren</label><input id="reportReporter" class="input" list="bildirenHafiza" placeholder="Tümü" oninput="updateRaporSummary()"></div>
+      <div><label class="muted">Teknisyen</label><input id="reportTechnician" class="input" list="ustaHafiza" placeholder="Tümü" oninput="updateRaporSummary()"></div>
+    </div>
+    <div id="raporOzet" class="summary">Rapor hazırlanıyor…</div>
+    <div class="row" style="margin-top:12px"><button class="btn primary" onclick="exportToExcel()">📥 Filtrelenmiş Excel'i indir (.xlsx)</button><span class="muted">Excel dosyasında arıza listesi ve işlem geçmişi ayrı sayfalarda bulunur.</span></div>
+    <div id="reportPreview" class="muted" style="margin-top:12px"></div>
+  </section>
+</div>
+
+<div id="settingsModal" class="modal hidden"><div class="modal-box">
+  <div class="card-title">Veritabanı Bağlantı Durumu</div>
+  <div id="settingsMessage" class="muted" style="margin-top:10px">Sistem otomatik olarak ortak veritabanına bağlanıyor…</div>
+  <div class="row" style="justify-content:flex-end; margin-top:15px"><button class="btn" onclick="closeSettings()">Kapat</button></div>
+</div></div>
+
+<div id="imageModal" class="modal hidden" onclick="closeModal()"><div class="modal-box"><img id="modalImg" src="" alt="Arıza fotoğrafı"></div></div>
+
+<script>
+const API_ROOT='https://api.jsonbin.io/v3';
+const HARDCODED_API_KEY='$2a$10$j7OHSjp/OOc1p/kC/PF88uoirJnoAzuF5JEOoiFoE9RYwKOE1eI5G';
+
+let apiKey=localStorage.getItem('ariza_api_key')||HARDCODED_API_KEY;
+let ntfyTopic=localStorage.getItem('ariza_ntfy_topic')||'';
+let indexBinId=''; // Ortak dizin, JSONBin koleksiyonundan otomatik bulunur.
+let arizaKayitlari=[];
+let hafizaLokasyonlar=[];
+let hafizaBildirenler=[];
+let hafizaUstalar=[];
+let tempPhotos=[null,null];
+let ustaLoggedIn=false;
+let raporUnlocked=false;
+let archiveMode=false;
+let knownRemoteIds=new Set();
+let syncBusy=false;
+let lastSyncAt=null;
+const USTA_SIFRESI='4535'; // Şifre güncellendi
+const $=id=>document.getElementById(id);
+
+function validTopic(t){return /^[A-Za-z0-9_-]{6,64}$/.test(t);}
+function setNtfyTopic(t){ntfyTopic=(t||'').trim();try{localStorage.setItem('ariza_ntfy_topic',ntfyTopic)}catch(e){}}
+async function sendNotification(title,message){if(!ntfyTopic)return false;const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),7000);try{const payload={topic:ntfyTopic,title:String(title).slice(0,120),message:String(message).slice(0,300),tags:['wrench'],priority:4};if(/^https?:/.test(location.href))payload.click=location.href.split('#')[0];const res=await fetch('https://ntfy.sh/',{method:'POST',body:JSON.stringify(payload),signal:ctrl.signal});return res.ok;}catch(e){return false;}finally{clearTimeout(to);}}
+
+function escapeHTML(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function formatUpper(el){const p=el.selectionStart;el.value=el.value.toLocaleUpperCase('tr-TR');try{el.setSelectionRange(p,p)}catch(e){}}
+function statusText(){const el=$('connectionStatus');const on=!!(apiKey&&indexBinId);el.className='statusline '+(on?'ok':'warn');if(on)el.textContent='☁ Ortak veritabanı bağlı · Son eşitleme: '+(lastSyncAt?lastSyncAt.toLocaleTimeString('tr-TR'):'henüz yapılmadı');else el.textContent='⚙ Ortak veritabanı otomatik olarak bağlanıyor…';}
+function fmtDur(m){m=Math.max(0,Math.round(m));if(m<60)return m+' dk';if(m<1440)return Math.floor(m/60)+' sa '+(m%60)+' dk';return Math.floor(m/1440)+' gün '+Math.floor((m%1440)/60)+' sa';}
+function setStatusFilter(v){if(v==='Tamamlandı'){switchArchiveTab(true);return;}const f=$('statusFilter');f.value=(f.value===v&&!archiveMode)?'ALL':v;if(archiveMode){switchArchiveTab(false);return;}renderTickets();}
+
+function showSection(id){
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.sec===id));
+  ['form-section','pano-section','rapor-section'].forEach(x=>$(x).classList.add('hidden'));
+  $(id).classList.remove('hidden');
+  if(id==='pano-section'){renderTickets();maybeSync(180000);}
+  if(id==='rapor-section'){populateMonthDropdown();updateRaporSummary();maybeSync(180000);}
+}
+
+function handleReportNav(){
+  if(!raporUnlocked){
+    const p=prompt('Rapor sayfasına erişmek için bakımcı şifresini giriniz:');
+    if(p===USTA_SIFRESI){
+      raporUnlocked=true;
+    }else{
+      if(p!==null) alert('Hatalı şifre.');
+      return;
+    }
+  }
+  showSection('rapor-section');
+}
+
+function openSettings(){$('settingsMessage').textContent=indexBinId?'Ortak veritabanına bağlantı kuruldu.':'Ortak veritabanına bağlanılıyor…';$('settingsModal').classList.remove('hidden');}
+function closeSettings(){$('settingsModal').classList.add('hidden');}
+
+async function apiRequest(path,options={}){
+  const headers={...(options.headers||{}),'X-Master-Key':apiKey};
+  if(options.body)headers['Content-Type']='application/json';
+  const res=await fetch(API_ROOT+path,{...options,headers});
+  let data={};try{data=await res.json()}catch(e){}
+  if(!res.ok){const msg=data.message||'';throw new Error(msg||`JSONBin hatası (${res.status})`);}
+  return data;
+}
+
+const SHARED_COLLECTION_NAME='Fabrika Ariza Ortak Havuz';
+let databaseInitPromise=null;
+async function autoInitDatabase(){
+  if(indexBinId)return indexBinId;
+  if(databaseInitPromise)return databaseInitPromise;
+  databaseInitPromise=(async()=>{
+    if(!apiKey)apiKey=HARDCODED_API_KEY;
+    // Bütün cihazlar aynı isimli JSONBin koleksiyonunu bulur.
+    let collections=await apiRequest('/c');
+    if(!Array.isArray(collections))collections=collections.records||collections.collections||[];
+    let collection=collections.find(x=>(x.collectionMeta?.name||x.metadata?.name||'')===SHARED_COLLECTION_NAME);
+    let collectionId=collection?.record||collection?.metadata?.id||collection?.id;
+    if(!collectionId){
+      const created=await apiRequest('/c',{method:'POST',headers:{'X-Collection-Name':SHARED_COLLECTION_NAME}});
+      collectionId=created.record||created.metadata?.id||created.id;
+      if(!collectionId){
+        // Başka cihaz aynı anda oluşturmuş olabilir; listeyi bir kez daha kontrol et.
+        collections=await apiRequest('/c');
+        if(!Array.isArray(collections))collections=collections.records||collections.collections||[];
+        collection=collections.find(x=>(x.collectionMeta?.name||x.metadata?.name||'')===SHARED_COLLECTION_NAME);
+        collectionId=collection?.record||collection?.metadata?.id||collection?.id;
+      }
+    }
+    if(!collectionId)throw new Error('Ortak veri alanı oluşturulamadı. JSONBin koleksiyon kotasını kontrol edin.');
+    // Bu koleksiyonda yalnızca ortak dizin bulunur; arıza kayıtları ayrı Bin olarak tutulur.
+    const page=await apiRequest('/c/'+encodeURIComponent(collectionId)+'/bins');
+    const bins=Array.isArray(page)?page:(page.bins||page.records||[]);
+    let sharedId=null;
+    for(const item of bins){
+      const candidate=item.record||item.id;
+      if(!candidate)continue;
+      try{const check=await apiRequest('/b/'+encodeURIComponent(candidate)+'/latest');if(check.record?.appRole==='ariza-index'){sharedId=candidate;break;}}catch(e){}
+    }
+    if(!sharedId){
+      const created=await apiRequest('/b',{method:'POST',headers:{'X-Bin-Private':'true','X-Bin-Name':'Fabrika Ariza Index','X-Collection-Id':collectionId},body:JSON.stringify({appRole:'ariza-index',ticketBins:[],nums:{},rev:0})});
+      sharedId=created.metadata?.id||created.record?.id;
+    }
+    if(!sharedId)throw new Error('Ortak kayıt dizini oluşturulamadı.');
+    indexBinId=sharedId;
+    try{localStorage.setItem('ariza_index_bin_id',sharedId)}catch(e){}
+    return indexBinId;
+  })();
+  try{return await databaseInitPromise;}catch(e){databaseInitPromise=null;throw e;}
+}
+
+let indexNums={};
+function fmtNo(v){const y=Math.floor(v/100000),n=v%100000;return 'ARZ-'+y+'-'+String(n).padStart(4,'0');}
+function parseNo(no){const m=String(no||'').match(/^ARZ-(\d{4})-(\d+)$/);return m?Number(m[1])*100000+Number(m[2]):null;}
+let lastRev=Number(localStorage.getItem('ariza_last_rev')||0),lastSyncError='',lastTryAt=0;
+function setLastRev(r){lastRev=r;try{localStorage.setItem('ariza_last_rev',String(r))}catch(e){}}
+function noteOwnRev(r){if(lastRev===r-1)setLastRev(r);}
+let _db=null;
+function idb(){return _db||(_db=new Promise((res,rej)=>{const r=indexedDB.open('ariza_db',1);r.onupgradeneeded=()=>r.result.createObjectStore('tickets',{keyPath:'remoteId'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}));}
+async function cacheAll(){try{const db=await idb();return await new Promise((res,rej)=>{const q=db.transaction('tickets').objectStore('tickets').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error);});}catch(e){return [];}}
+async function cachePut(list){try{const db=await idb();await new Promise((res,rej)=>{const tx=db.transaction('tickets','readwrite'),st=tx.objectStore('tickets');list.forEach(t=>{if(t&&t.remoteId)st.put(JSON.parse(JSON.stringify(t)))});tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}catch(e){}}
+function renderKeep(){const keep={};document.querySelectorAll('#ticketContainer textarea,#ticketContainer input').forEach(e=>{if(e.id&&e.value)keep[e.id]=e.value;});renderTickets();Object.entries(keep).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v;});}
+async function getTicketBinIds(){if(!indexBinId)await autoInitDatabase();const data=await apiRequest('/b/'+encodeURIComponent(indexBinId)+'/latest');const rec=data.record||{};if(!Array.isArray(rec.ticketBins))throw new Error('Kayıt dizini biçimi geçersiz.');indexNums=(rec.nums&&typeof rec.nums==='object')?rec.nums:{};return [...new Set([...rec.ticketBins,...Object.keys(indexNums)].filter(x=>typeof x==='string'&&x.length>0))];}
+async function registerInIndex(id,wanted){
+  if(!indexBinId)await autoInitDatabase();
+  for(let attempt=0;attempt<8;attempt++){
+    const data=await apiRequest('/b/'+encodeURIComponent(indexBinId)+'/latest');
+    const record=data.record||{};
+    const ids=Array.isArray(record.ticketBins)?record.ticketBins:[];
+    const nums=(record.nums&&typeof record.nums==='object')?{...record.nums}:{};
+    if(nums[id]){indexNums=nums;return fmtNo(nums[id]);}
+    const y=new Date().getFullYear();
+    const used=new Set(Object.values(nums));
+    arizaKayitlari.forEach(t=>{if(t.remoteId!==id){const v=parseNo(t.kayitNo);if(v)used.add(v);}});
+    let v=wanted?parseNo(wanted):null;
+    if(!v||used.has(v)){let max=y*100000;used.forEach(x=>{if(Math.floor(x/100000)===y&&x>max)max=x;});v=max+1;}
+    nums[id]=v;
+    const rev=(Number(record.rev)||0)+1;
+    const body=JSON.stringify({...record,ticketBins:ids,nums,rev});
+    await apiRequest('/b/'+encodeURIComponent(indexBinId),{method:'PUT',headers:{'X-Bin-Versioning':'false'},body});
+    await new Promise(r=>setTimeout(r,300));
+    const verify=await apiRequest('/b/'+encodeURIComponent(indexBinId)+'/latest');
+    if(verify.record?.nums?.[id]===v){indexNums=verify.record.nums;noteOwnRev(rev);return fmtNo(v);}
+  }
+  throw new Error('Kayıt numarası eklenemedi.');
+}
+async function createRemoteTicket(ticket,wanted){
+  const body=JSON.stringify(ticket);
+  const data=await apiRequest('/b',{method:'POST',headers:{'X-Bin-Private':'true','X-Bin-Name':'ARIZA'},body});
+  const id=data.metadata?.id;
+  if(!id)throw new Error('Arıza ID alınamadı.');
+  ticket.remoteId=id;
+  ticket.kayitNo=await registerInIndex(id,wanted);
+  return ticket;
+}
+async function updateRemoteTicket(ticket){if(!ticket.remoteId)throw new Error('Kayıt ID yok.');const body=JSON.stringify(ticket);await apiRequest('/b/'+encodeURIComponent(ticket.remoteId),{method:'PUT',headers:{'X-Bin-Versioning':'false'},body});return ticket;}
+async function readRemoteTicket(id){const data=await apiRequest('/b/'+encodeURIComponent(id)+'/latest');const t=data.record;if(!t)throw new Error('Kayıt okunamadı');t.remoteId=id;if(indexNums[id])t.kayitNo=fmtNo(indexNums[id]);return t;}
+function normalizeTicket(t){const now=new Date().toISOString();t.id=t.id||Date.now()+Math.floor(Math.random()*1000);t.rawDate=t.rawDate||now;t.tarihStr=t.tarihStr||new Date(t.rawDate).toLocaleString('tr-TR');t.statu=t.statu||'Bekliyor';t.ustalar=Array.isArray(t.ustalar)?t.ustalar:[];t.fotograflar=Array.isArray(t.fotograflar)?t.fotograflar:[];t.islemGecmisi=Array.isArray(t.islemGecmisi)?t.islemGecmisi:[];t.teknikNot=t.teknikNot||'';t.kayitNo=t.kayitNo||'ARZ-'+new Date(t.rawDate).getFullYear()+'-'+String(t.id).slice(-4);return t;}
+function rebuildMemories(){const loc=new Set(),rep=new Set(),tech=new Set();arizaKayitlari.forEach(t=>{if(t.lokasyon)loc.add(t.lokasyon);if(t.bildiren)rep.add(t.bildiren);(t.ustalar||[]).forEach(x=>tech.add(x));(t.islemGecmisi||[]).forEach(x=>{if(x.eylemYapan)tech.add(x.eylemYapan)});});hafizaLokasyonlar=[...loc].sort();hafizaBildirenler=[...rep].sort();hafizaUstalar=[...tech].sort();fillDatalist('lokasyonHafiza',hafizaLokasyonlar);fillDatalist('bildirenHafiza',hafizaBildirenler);fillDatalist('ustaHafiza',hafizaUstalar);}
+function fillDatalist(id,items){const el=$(id);if(!el)return;el.innerHTML=items.map(x=>`<option value="${escapeHTML(x)}"></option>`).join('');}
+
+async function syncIncremental(full=false){
+  if(syncBusy)return false;
+  syncBusy=true;
+  try{
+    if(!indexBinId) await autoInitDatabase();
+    if(!indexBinId) throw new Error('Ortak veritabanı bulunamadı. JSONBin bağlantısını kontrol edin.');
+    
+    const data=await apiRequest('/b/'+encodeURIComponent(indexBinId)+'/latest');
+    const rec=data.record||{};
+    indexNums=(rec.nums&&typeof rec.nums==='object')?rec.nums:{};
+    const ids=[...new Set([...(rec.ticketBins||[]),...Object.keys(indexNums)].filter(x=>typeof x==='string'))];
+    const idSet=new Set(ids);
+    const rev=Number(rec.rev)||0;
+    const have=new Map(arizaKayitlari.map(t=>[t.remoteId,t]));
+    const need=new Set(ids.filter(id=>!have.has(id)));
+    if(full) ids.forEach(id=>need.add(id));
+    
+    const list=[...need];
+    const fetched=[];
+    for(let i=0;i<list.length;i+=4){
+      const batch=await Promise.all(list.slice(i,i+4).map(async id=>{try{return await readRemoteTicket(id)}catch(e){return null}}));
+      fetched.push(...batch.filter(Boolean).map(normalizeTicket));
+    }
+    fetched.forEach(f=>have.set(f.remoteId,f));
+    arizaKayitlari=[...have.values()].filter(t=>idSet.has(t.remoteId)).sort((a,b)=>new Date(b.rawDate)-new Date(a.rawDate));
+    if(fetched.length)await cachePut(fetched);
+    rebuildMemories();
+    renderKeep();
+    populateMonthDropdown();
+    updateRaporSummary();
+    setLastRev(rev);
+    lastSyncAt=new Date();
+    statusText();
+    return true;
+  }catch(e){
+    lastSyncError=e.message;
+    $('connectionStatus').className='statusline err';
+    $('connectionStatus').textContent='Bağlantı hatası: '+e.message;
+    return false;
+  }finally{
+    syncBusy=false;
+  }
+}
+
+async function syncAll(showMessage=true){const ok=await syncIncremental(true);if(showMessage)alert(ok?`Kayıtlar güncel (${arizaKayitlari.length} arıza).`:'Eşitleme yapılamadı: '+lastSyncError);}
+function maybeSync(minMs){if(syncBusy||document.hidden)return;if(Date.now()-lastTryAt<minMs)return;syncIncremental(false);}
+
+async function compressImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('Fotoğraf okunamadı.'));reader.onload=e=>{const img=new Image();img.onerror=()=>reject(new Error('Fotoğraf açılamadı.'));img.onload=()=>{let max=800;const qualities=[.72,.62,.52,.42,.34];let result='';for(let pass=0;pass<8;pass++){const scale=Math.min(1,max/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);for(const q of qualities){result=canvas.toDataURL('image/jpeg',q);if(result.length<=26000){resolve(result);return;}}max=Math.round(max*.78);}resolve(result);};img.src=e.target.result;};reader.readAsDataURL(file);});}
+function triggerPhotoUpload(i){$('photo'+i).click();}
+async function handlePhotoSelect(input,i){if(!input.files?.[0])return;try{const data=await compressImage(input.files[0]);tempPhotos[i-1]=data;$('p'+i+'-img').src=data;$('p'+i+'-img').classList.remove('hidden');$('p'+i+'-text').classList.add('hidden');$('p'+i+'-remove').classList.remove('hidden');}catch(e){alert(e.message);input.value='';}}
+function removePhoto(e,i){e?.stopPropagation();tempPhotos[i-1]=null;$('photo'+i).value='';$('p'+i+'-img').src='';$('p'+i+'-img').classList.add('hidden');$('p'+i+'-text').classList.remove('hidden');$('p'+i+'-remove').classList.add('hidden');}
+
+async function handleFormSubmit(e){
+  e.preventDefault();
+  const btn=$('submitBtn');
+  btn.disabled=true;
+  btn.textContent='Kaydediliyor…';
+  try{
+    const lokasyon=$('lokasyonInput').value.trim().toLocaleUpperCase('tr-TR'),bildiren=$('bildirenInput').value.trim().toLocaleUpperCase('tr-TR'),aciklama=$('aciklamaInput').value.trim();
+    if(bildiren.length<4)throw new Error('Bildiren kişi adı en az 4 karakter olmalı.');
+    if(!lokasyon||!aciklama)throw new Error('Lokasyon ve açıklama zorunludur.');
+    const ticket={id:Date.now()+'-'+Math.floor(Math.random()*10000),kayitNo:'ARZ-ATANIYOR',tarihStr:new Date().toLocaleString('tr-TR'),rawDate:new Date().toISOString(),lokasyon,bildiren,aciklama,fotograflar:tempPhotos.filter(Boolean),statu:'Bekliyor',ustalar:[],teknikNot:'',ilkMudahaleTarihi:null,kapanisTarihi:null,sureDakika:0,islemGecmisi:[{rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:'SİSTEM',islem:'Arıza bildirildi.'}]};
+    await createRemoteTicket(ticket);
+    arizaKayitlari.unshift(ticket);
+    cachePut([ticket]);
+    rebuildMemories();
+    $('arizaForm').reset();
+    removePhoto(null,1);removePhoto(null,2);
+    alert('Arıza bildirimi kaydedildi. Kayıt No: '+ticket.kayitNo);
+    showSection('pano-section');
+  }catch(err){
+    alert('Kayıt yapılamadı: '+err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent='BİLDİRİMİ GÖNDER';
+  }
+}
+
+function toggleUstaLock(){if(ustaLoggedIn){ustaLoggedIn=false;$('lockStatusText').textContent='Bakımcı Girişi';renderTickets();return;}const p=prompt('Bakımcı şifresini giriniz:');if(p===USTA_SIFRESI){ustaLoggedIn=true;$('lockStatusText').textContent='Bakımcı Oturumu Açık';renderTickets();}else if(p!==null)alert('Hatalı şifre.');}
+function switchArchiveTab(v){archiveMode=v;$('activeTab').classList.toggle('active',!v);$('archiveTab').classList.toggle('active',v);$('statusFilter').classList.toggle('hidden',v);renderTickets();}
+function badgeClass(s){return {'İşlemde':'islem','Parça Bekliyor':'parca','Servis Bekliyor':'servis','Tamamlandı':'tamam'}[s]||'';}
+function renderTickets(){const c=$('ticketContainer');if(!c)return;c.innerHTML='';let list=arizaKayitlari.filter(t=>archiveMode?t.statu==='Tamamlandı':t.statu!=='Tamamlandı');const q=($('ticketSearch')?.value||'').toLocaleUpperCase('tr-TR');const sf=$('statusFilter')?.value||'ALL';if(q)list=list.filter(t=>(t.kayitNo+' '+t.lokasyon+' '+t.bildiren+' '+t.aciklama).toLocaleUpperCase('tr-TR').includes(q));if(!archiveMode&&sf!=='ALL')list=list.filter(t=>t.statu===sf);if(!list.length){c.innerHTML='<div class="empty">'+(archiveMode?'Tamamlanan arıza yok.':'Açık arıza yok.')+'</div>';updateCounters();return;}list.forEach(t=>{const card=document.createElement('article');card.className='ticket';card.dataset.status=t.statu;const photos=(t.fotograflar||[]).map((src,i)=>`<img src="${src}" alt="Fotoğraf ${i+1}" onclick="openModal('${src}')">`).join('');const hist=(t.islemGecmisi||[]).map(h=>`<div class="history-item"><strong>${escapeHTML(h.zaman||'')}</strong> · ${escapeHTML(h.eylemYapan||'SİSTEM')} · ${escapeHTML(h.islem||'')}</div>`).join('');const actions=ustaLoggedIn&&!archiveMode?`<div class="actions"><div class="row"><input id="usta-${escapeHTML(t.id)}" class="input" list="ustaHafiza" placeholder="Teknisyen ekle (en az 4 karakter)" oninput="formatUpper(this)" style="flex:1"><button class="btn small" onclick="addTechnician('${escapeHTML(t.id)}')">＋ Ekle</button></div><textarea id="not-${escapeHTML(t.id)}" placeholder="Teknik not / açıklama…"></textarea><div class="row"><button class="btn small" onclick="saveTechnicianNote('${escapeHTML(t.id)}')">Notu Kaydet</button></div><div class="row"><button class="btn small st-islem" onclick="updateTicketStatus('${escapeHTML(t.id)}','İşlemde')">İşlemde</button><button class="btn small st-parca" onclick="updateTicketStatus('${escapeHTML(t.id)}','Parça Bekliyor')">Parça Bekliyor</button><button class="btn small st-servis" onclick="updateTicketStatus('${escapeHTML(t.id)}','Servis Bekliyor')">Servis Bekliyor</button><button class="btn small st-tamam" onclick="updateTicketStatus('${escapeHTML(t.id)}','Tamamlandı')">Tamamla & Kapat</button></div></div>`:'';card.innerHTML=`<div class="ticket-head"><div class="ticket-id"><span class="ticket-title">${escapeHTML(t.lokasyon)}</span><span class="ticket-no">${escapeHTML(t.kayitNo)}</span></div><div class="ticket-state"><span class="badge ${badgeClass(t.statu)}">${escapeHTML(t.statu)}</span>${t.statu!=='Tamamlandı'?`<span class="age">⏱ ${fmtDur((Date.now()-new Date(t.rawDate))/60000)}</span>`:''}</div></div><div class="ticket-info">${escapeHTML(t.aciklama)}</div>${photos?`<div class="photos">${photos}</div>`:''}<div class="meta"><span>Bildiren: <strong>${escapeHTML(t.bildiren)}</strong></span><span>Açılış: ${escapeHTML(t.tarihStr)}</span><span>Teknisyenler: <strong>${escapeHTML((t.ustalar||[]).join(', ')||'Yok')}</strong></span>${t.sureDakika?`<span>Süre: <strong>${t.sureDakika} dk</strong></span>`:''}</div>${hist?`<details class="history"><summary>İşlem geçmişi (${(t.islemGecmisi||[]).length})</summary>${hist}</details>`:''}${actions}`;c.appendChild(card);});updateCounters();}
+function updateCounters(){const a=arizaKayitlari.filter(t=>t.statu!=='Tamamlandı');const n=s=>a.filter(t=>t.statu===s).length;$('countBekliyor').textContent=n('Bekliyor');$('countIslemde').textContent=n('İşlemde');$('countParca').textContent=n('Parça Bekliyor');$('countServis').textContent=n('Servis Bekliyor');$('countTamam').textContent=arizaKayitlari.filter(t=>t.statu==='Tamamlandı').length;const fv=$('statusFilter').value;document.querySelectorAll('#counterGrid .counter').forEach(b=>b.classList.toggle('active',archiveMode?b.dataset.st==='Tamamlandı':b.dataset.st===fv));$('counterGrid').classList.toggle('has-filter',archiveMode||fv!=='ALL');}
+function currentActor(){return $('currentActor').value.trim().toLocaleUpperCase('tr-TR');}
+
+async function mutateTicket(id,fn){
+  const t=arizaKayitlari.find(x=>String(x.id)===String(id));
+  if(!t||!t.remoteId)throw new Error('Kayıt bulunamadı.');
+  const fresh=normalizeTicket(await readRemoteTicket(t.remoteId));
+  fn(fresh);
+  await updateRemoteTicket(fresh);
+  const ix=arizaKayitlari.findIndex(x=>x.remoteId===fresh.remoteId);
+  if(ix>=0)arizaKayitlari[ix]=fresh;
+  cachePut([fresh]);
+  rebuildMemories();
+  renderTickets();
+  updateRaporSummary();
+  return fresh;
+}
+
+async function addTechnician(id){const input=$('usta-'+id),name=(input?.value||'').trim().toLocaleUpperCase('tr-TR'),actor=currentActor();if(name.length<4){alert('En az 4 karakter olmalı.');return;}if(actor.length<4){alert('Kendi adınızı girin.');return;}try{await mutateTicket(id,t=>{if(!t.ustalar.includes(name))t.ustalar.push(name);addHistory(t,actor,`${name} eklendi.`);});$('currentActor').value=actor;}catch(e){alert(e.message);}}
+function addHistory(t,actor,action){t.islemGecmisi.push({rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:actor,islem:action});}
+async function saveTechnicianNote(id){const actor=currentActor(),note=$('not-'+id)?.value.trim()||'';if(actor.length<4||!note){alert('Teknisyen adı ve not zorunludur.');return;}try{await mutateTicket(id,t=>{t.teknikNot=note;addHistory(t,actor,'Not: '+note);if(!t.ustalar.includes(actor))t.ustalar.push(actor);});alert('Kaydedildi.');}catch(e){alert(e.message);}}
+async function updateTicketStatus(id,status){const actor=currentActor(),note=$('not-'+id)?.value.trim()||'';if(actor.length<4){alert('Teknisyen adını girin.');return;}if(status==='Tamamlandı'&&!note){alert('Çözüm açıklaması yazın.');return;}try{await mutateTicket(id,t=>{const now=new Date();if(status!=='Bekliyor'&&!t.ilkMudahaleTarihi)t.ilkMudahaleTarihi=now.toISOString();t.statu=status;if(note)t.teknikNot=note;if(status==='Tamamlandı'){t.kapanisTarihi=now.toISOString();t.sureDakika=Math.max(1,Math.round((now-new Date(t.rawDate))/60000));}addHistory(t,actor,`Durum "${status}" oldu.${note?' Not: '+note:''}`);if(!t.ustalar.includes(actor))t.ustalar.push(actor);});alert('Güncellendi.');}catch(e){alert(e.message);}}
+
+function openModal(src){$('modalImg').src=src;$('imageModal').classList.remove('hidden')}function closeModal(){$('imageModal').classList.add('hidden');$('modalImg').src='';}
+function monthKey(t){const d=new Date(t.rawDate);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function populateMonthDropdown(){const s=$('aySecimi');if(!s)return;const old=s.value;s.innerHTML='<option value="ALL">Tüm zamanlar</option>';const months=[...new Set(arizaKayitlari.map(monthKey))].sort().reverse();const names=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];months.forEach(k=>{const [y,m]=k.split('-');s.add(new Option(`${y} - ${names[Number(m)-1]}`,k));});if([...s.options].some(o=>o.value===old))s.value=old;}
+function getReportData(){const m=$('aySecimi').value,st=$('reportStatus').value,loc=$('reportLocation').value.trim().toLocaleUpperCase('tr-TR'),rep=$('reportReporter').value.trim().toLocaleUpperCase('tr-TR'),tech=$('reportTechnician').value.trim().toLocaleUpperCase('tr-TR');return arizaKayitlari.filter(t=>(m==='ALL'||monthKey(t)===m)&&(st==='ALL'||t.statu===st)&&(!loc||t.lokasyon.toLocaleUpperCase('tr-TR').includes(loc))&&(!rep||t.bildiren.toLocaleUpperCase('tr-TR').includes(rep))&&(!tech||(t.ustalar||[]).some(x=>x.toLocaleUpperCase('tr-TR').includes(tech))));}
+function updateRaporSummary(){const d=getReportData(),done=d.filter(t=>t.statu==='Tamamlandı');$('raporOzet').innerHTML=`<div class="stats"><div class="stat"><span>Filtrelenen</span><strong>${d.length}</strong></div><div class="stat tamam"><span>Tamamlanan</span><strong>${done.length}</strong></div><div class="stat acik"><span>Açık</span><strong>${d.length-done.length}</strong></div></div>`;$('reportPreview').textContent=d.length?`Kayıtlar listeleniyor.`:'Kayıt yok.';}
+function exportToExcel(){if(typeof XLSX==='undefined')return;const d=getReportData();if(!d.length)return;const rows=d.map(t=>({'Kayıt No':t.kayitNo,'Tarih':t.tarihStr,'Lokasyon':t.lokasyon,'Bildiren':t.bildiren,'Açıklama':t.aciklama,'Durum':t.statu,'Teknisyenler':(t.ustalar||[]).join(', '),'Not':t.teknikNot||''}));const wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Arızalar');XLSX.writeFile(wb,'Ariza_Raporu.xlsx');}
+
+document.addEventListener('DOMContentLoaded',async()=>{
+  try{
+    const cached=await cacheAll();
+    arizaKayitlari=cached.map(normalizeTicket).sort((a,b)=>new Date(b.rawDate)-new Date(a.rawDate));
+    rebuildMemories();
+    renderTickets();
+    populateMonthDropdown();
+    updateRaporSummary();
+    await syncIncremental(false);
+  }catch(e){
+    console.error(e);
+  }
+});
+</script>
+</body>
+</html>
