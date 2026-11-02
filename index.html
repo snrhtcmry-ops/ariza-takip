@@ -28,6 +28,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-size:16px;line-height:1
 .navbtn{border:0;border-radius:9px;padding:10px 14px;font-size:.92rem;font-weight:650;cursor:pointer;background:transparent;color:#C5CDD3}
 .navbtn:hover{background:#38424A}
 .navbtn.active{background:var(--panel);color:var(--ink)}
+.language-select{border:1px solid #69757D;color:var(--bar-ink);background:#303940;padding:8px 9px;min-width:112px}
+.language-select option{background:#fff;color:#1E252A}
 
 /* bağlantı durumu */
 .statusline{padding:8px 12px;border-radius:9px;background:var(--panel);border:1px solid var(--line);font-size:.82rem;color:var(--muted)}
@@ -269,6 +271,7 @@ textarea{resize:vertical;min-height:92px}
       <button class="navbtn" data-sec="pano-section" onclick="showSection('pano-section')">▤ Bakım Panosu</button>
       <button class="navbtn" data-sec="rapor-section" onclick="handleReportNav()">▥ Rapor & Excel</button>
       <button class="navbtn" onclick="openSettings()">⚙ Bağlantı</button>
+      <select id="languageSelect" class="navbtn language-select" onchange="setLanguage(this.value)" aria-label="Dil"><option value="tr" selected>TR · Türkçe</option><option value="en">EN · English</option></select>
     </div>
   </header>
   <div id="connectionStatus" class="statusline warn">Veritabanı bağlantısı kontrol ediliyor…</div>
@@ -370,6 +373,136 @@ const NTFY_TOPIC='fabrika-ariza-manisa-8f62c91d';
 let ntfyTopic=NTFY_TOPIC;
 const $=id=>document.getElementById(id);
 
+/* Arayüz dili: her tam açılışta Türkçe; EN seçimi o oturum için geçerlidir. */
+let appLanguage='tr';
+const UI_TR_EN={
+  '🛠️ Fabrika Teknik Servis & Arıza Takip':'🛠️ Factory Maintenance & Fault Tracking',
+  '＋ Arıza Bildir':'＋ Report a Fault','▤ Bakım Panosu':'▤ Maintenance Board','▥ Rapor & Excel':'▥ Reports & Excel','⚙ Bağlantı':'⚙ Connection',
+  '☁ Bağlı':'☁ Connected','⚠ Bağlı değil':'⚠ Disconnected','Veritabanı bağlantısı kontrol ediliyor…':'Checking database connection…',
+  'Yeni Arıza Bildirimi':'New Fault Report','Bölüm / Makine / Lokasyon':'Department / Machine / Location',
+  'Bildiren kişi (en az 4 karakter)':'Reported by (at least 4 characters)','Arıza açıklaması':'Fault description',
+  'Fotoğraf (isteğe bağlı, en fazla 2 adet)':'Photos (optional, up to 2)','📷 Fotoğraf 1':'📷 Photo 1','📷 Fotoğraf 2':'📷 Photo 2',
+  'Fotoğraflar gönderilmeden önce küçültülür.':'Photos are compressed before upload.','BİLDİRİMİ GÖNDER':'SUBMIT FAULT REPORT',
+  'Bakım Yönetim Panosu':'Maintenance Dashboard','↻ Yenile':'↻ Refresh','İşlemi yapan teknisyen (isteğe bağlı; boşsa eklenen teknisyen adı kullanılır)':'Technician performing the action (optional; defaults to the added technician)',
+  'Bekliyor':'Pending','İşlemde':'In Progress','Parça Bekliyor':'Waiting for Parts','Servis Bekliyor':'Waiting for Service','Tamamlandı':'Completed',
+  'Aktif Arızalar':'Active Faults','Tamamlananlar':'Completed Faults','Tamamlanan':'Completed count',
+  'Raporlama ve Excel Dışa Aktarım':'Reports & Excel Export','↻ Verileri yenile':'↻ Refresh data','Bildirim ayı':'Report month',
+  'Tüm zamanlar':'All time','Durum':'Status','Tüm durumlar':'All statuses','Makine / lokasyon':'Machine / location',
+  'Bildiren':'Reported by','Teknisyen':'Technician','Rapor hazırlanıyor…':'Preparing report…',
+  '📥 Filtrelenmiş Excel'i indir (.xlsx)':'📥 Download filtered Excel (.xlsx)',
+  'Excel dosyasında arıza listesi ve işlem geçmişi ayrı sayfalarda bulunur.':'The Excel file contains separate sheets for faults and operation history.',
+  'Veritabanı Bağlantı Durumu':'Database Connection Status',
+  'Firebase bağlantısı arka planda otomatik kontrol edilir.':'The Firebase connection is checked automatically in the background.',
+  'Bakım ekibi bildirim kanalı':'Maintenance notification channel','Kopyala':'Copy','Test Bildirimi':'Test Notification','Kapat':'Close',
+  'Bakımcı Girişi':'Maintenance Login','Bakımcı Oturumu Açık':'Maintenance Session Active',
+  '＋ Ekle':'＋ Add','Teknisyen ekle (en az 4 karakter)':'Add technician (at least 4 characters)',
+  'Teknik not / açıklama…':'Technical note / description…','Notu Kaydet':'Save Note','Tamamla & Kapat':'Complete & Close',
+  '↶ Arızayı Yeniden Aç':'↶ Reopen Fault','İşlem geçmişi':'Operation history',
+  'Tamamlanan arıza yok.':'No completed faults.','Açık arıza yok.':'No open faults.',
+  'Açılış':'Opened','Teknisyenler':'Technicians','Süre':'Duration','Filtrelenen':'Filtered',
+  'Açık':'Open','Kayıtlar listeleniyor.':'Records are displayed.','Kayıt yok.':'No records.',
+  'Arızalar':'Faults','İşlem Geçmişi':'Operation History',
+  'Seçili kayıtlar için işlem geçmişi bulunmuyor.':'No operation history is available for the selected records.',
+  'Bakım paneline erişmek için bakımcı şifresini giriniz:':'Enter the maintenance password to access the maintenance panel:',
+  'Rapor sayfasına erişmek için bakımcı şifresini giriniz:':'Enter the maintenance password to access reports:',
+  'Bakımcı şifresini giriniz:':'Enter the maintenance password:','Hatalı şifre.':'Incorrect password.',
+  'Kaydediliyor…':'Saving…','Bildiren kişi adı en az 4 karakter olmalı.':'Reporter name must be at least 4 characters.',
+  'Lokasyon ve açıklama zorunludur.':'Location and description are required.','Arıza bildirildi.':'Fault reported.',
+  'Yeni arıza bildirimi':'New fault report','Arıza bildirimi kaydedildi. Kayıt No:':'Fault report saved. Ticket No:',
+  'Kayıt yapılamadı:':'Could not save the record:','Fotoğraf okunamadı.':'Could not read the photo.',
+  'Fotoğraf açılamadı.':'Could not open the photo.',
+  'Fotoğraf yeterince küçültülemedi. Daha küçük bir fotoğraf seçin.':'The photo could not be compressed enough. Please choose a smaller image.',
+  'Excel bileşeni yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenileyin.':'The Excel component could not be loaded. Check your internet connection and refresh the page.',
+  'Seçili filtrelere uygun kayıt bulunamadı.':'No records match the selected filters.',
+  'Teknisyen adı en az 4 karakter olmalı.':'Technician name must be at least 4 characters.',
+  'Kayıt bulunamadı.':'Record not found.','Firebase bağlantısı hazır değil.':'Firebase connection is not ready.',
+  'Teknisyen adı ve not zorunludur.':'Technician name and note are required.','Kaydedildi.':'Saved.',
+  'Teknisyen adını girin.':'Enter the technician name.','Çözüm açıklaması yazın.':'Enter a resolution description.',
+  'Güncellendi.':'Updated.','Yeniden açmak için işlemi yapan teknisyen adını girin.':'Enter the technician name to reopen this fault.',
+  'Bu tamamlanmış arıza yeniden aktif duruma alınsın mı?':'Reopen this completed fault?',
+  'Arıza yeniden açıldı.':'Fault reopened.','Tamamlanan arıza yeniden açıldı.':'Completed fault was reopened.',
+  'Kayıt güncellenemedi. Başka bir işlemle çakışmış olabilir; tekrar deneyin.':'The record could not be updated. It may conflict with another operation; please try again.',
+  'Veriler güncel':'Data is up to date','Eşitleme yapılamadı:':'Synchronization failed:',
+  'Bildirim bağlantısı çalışıyor. Bu mesajı aldıysanız ntfy kurulumu başarılı.':'The notification channel is working. Receiving this message confirms the ntfy setup.',
+  'Arıza Takip Test Bildirimi':'Fault Tracking Test Notification',
+  'Test bildirimi ntfy kanalına gönderildi. Telefonunuza ulaşıp ulaşmadığını kontrol edin.':'The test notification was sent to the ntfy channel. Check whether it arrived on your phone.',
+  'Bildirim gönderilemedi. İnternet bağlantısını ve tarayıcı konsolundaki ntfy hatasını kontrol edin.':'The notification could not be sent. Check your internet connection and the ntfy error in the browser console.',
+  'Zil + Sesli Anons · Test Et':'Bell + Voice Announcement · Test',
+  'Kısa zilin ardından Türkçe sesle “Dikkat! Yeni arıza bildirimi geldi.” anonsunu test eder.':'Tests a short bell followed by the English announcement “Attention! A new fault report has arrived.”',
+  'Ses açılamadı. Sayfanın içine bir kez tıklayın ve tarayıcı ses izinlerini kontrol edin.':'Could not enable sound. Click once inside the page and check your browser audio permissions.',
+  'Bu tarayıcıda sesli anons desteklenmiyor. Kısa zil yine çalışabilir.':'Voice announcements are not supported in this browser. The bell may still work.',
+  'Dikkat! Yeni arıza bildirimi geldi.':'Attention! A new fault report has arrived.',
+  'SİSTEM':'SYSTEM','Bildiren:':'Reported by:','Açılış:':'Opened:','Teknisyenler:':'Technicians:',
+  'Kayıt No':'Ticket No','Bildirim Tarihi':'Reported At','Lokasyon':'Location','Açıklama':'Description',
+  'İlk Müdahale':'First Response','Kapanış':'Closed At','Toplam Süre (dk)':'Total Duration (min)',
+  'Teknik Not':'Technical Note','Fotoğraf Sayısı':'Photo Count','İşlem Tarihi':'Action Date',
+  'İşlemi Yapan':'Performed By','İşlem / Açıklama':'Action / Description','Bilgi':'Information',
+  'Ocak':'January','Şubat':'February','Mart':'March','Nisan':'April','Mayıs':'May','Haziran':'June',
+  'Temmuz':'July','Ağustos':'August','Eylül':'September','Ekim':'October','Kasım':'November','Aralık':'December',
+  'Örn: DOLUM HATTI 3':'e.g. FILLING LINE 3','Ad Soyad':'Full name',
+  'Arızayı ve bulunduğu noktayı anlaşılır şekilde açıklayınız…':'Describe the fault and its location clearly…',
+  'Kendi adınızı yazabilirsiniz':'You can enter your name',
+  'Kayıt no, makine veya bildiren ara':'Search ticket no., machine or reporter',
+  'Tümü':'All'
+};
+const UI_EN_TR=Object.fromEntries(Object.entries(UI_TR_EN).map(([tr,en])=>[en,tr]));
+function tr(text){
+  const value=String(text??'');
+  return appLanguage==='en'?(UI_TR_EN[value]||value):(UI_EN_TR[value]||value);
+}
+function isUserDataTextNode(node){
+  const parent=node?.parentElement;
+  if(!parent)return false;
+  return !!parent.closest('script,style,textarea,input,.ticket-info,.ticket-title,.ticket-no,.history-item,.photos,.meta strong,.bar-name');
+}
+function translateTextNode(node){
+  if(!node||node.nodeType!==Node.TEXT_NODE||isUserDataTextNode(node))return;
+  const raw=node.nodeValue||'',trimmed=raw.trim();if(!trimmed)return;
+  const translated=tr(trimmed);if(translated!==trimmed)node.nodeValue=raw.replace(trimmed,translated);
+}
+function translateTree(root){
+  if(!root)return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  while(walker.nextNode())translateTextNode(walker.currentNode);
+  const elements=root.querySelectorAll?root.querySelectorAll('*'):[];
+  elements.forEach(el=>{
+    ['placeholder','title','aria-label'].forEach(attr=>{
+      if(el.hasAttribute(attr)){const oldValue=el.getAttribute(attr),newValue=tr(oldValue);if(newValue!==oldValue)el.setAttribute(attr,newValue);}
+    });
+  });
+}
+function setLanguage(language){
+  appLanguage=language==='en'?'en':'tr';
+  document.documentElement.lang=appLanguage;
+  const selector=$('languageSelect');if(selector)selector.value=appLanguage;
+  document.title=appLanguage==='en'?'Factory Maintenance & Fault Tracking':'Fabrika Teknik Servis & Arıza Takip';
+  translateTree(document.body);
+  updatePanelSoundButton();
+  renderTickets();populateMonthDropdown();updateRaporSummary();
+  translateTree(document.body);
+}
+function initializeLanguage(){
+  appLanguage='tr';
+  document.documentElement.lang='tr';
+  const selector=$('languageSelect');if(selector)selector.value='tr';
+  document.title='Fabrika Teknik Servis & Arıza Takip';
+  translateTree(document.body);
+  if(!window.__arizaLanguageObserver){
+    const observer=new MutationObserver(mutations=>{
+      mutations.forEach(mutation=>{
+        if(mutation.type==='characterData')translateTextNode(mutation.target);
+        else mutation.addedNodes.forEach(node=>{
+          if(node.nodeType===Node.TEXT_NODE)translateTextNode(node);
+          else if(node.nodeType===Node.ELEMENT_NODE)translateTree(node);
+        });
+      });
+    });
+    observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+    window.__arizaLanguageObserver=observer;
+  }
+}
+
+
 function firebaseConfigIsReady(){
   const values=['apiKey','authDomain','databaseURL','projectId','appId'];
   return values.every(k=>typeof FIREBASE_CONFIG[k]==='string' && FIREBASE_CONFIG[k].trim() && !FIREBASE_CONFIG[k].includes('_BURAYA'));
@@ -445,14 +578,20 @@ async function sendNotification(title,message){
   finally{clearTimeout(timeout);}
 }
 async function sendTestNotification(){
-  const ok=await sendNotification('Arıza Takip Test Bildirimi','Bildirim bağlantısı çalışıyor. Bu mesajı aldıysanız ntfy kurulumu başarılı.');
-  alert(ok?'Test bildirimi ntfy kanalına gönderildi. Telefonunuza ulaşıp ulaşmadığını kontrol edin.':'Bildirim gönderilemedi. İnternet bağlantısını ve tarayıcı konsolundaki ntfy hatasını kontrol edin.');
+  const english=appLanguage==='en';
+  const ok=await sendNotification(
+    english?'Fault Tracking Test Notification':'Arıza Takip Test Bildirimi',
+    english?'The notification channel is working. This message confirms the ntfy setup.':'Bildirim bağlantısı çalışıyor. Bu mesajı aldıysanız ntfy kurulumu başarılı.'
+  );
+  alert(ok
+    ?(english?'The test notification was sent to the ntfy channel. Check your phone.':'Test bildirimi ntfy kanalına gönderildi. Telefonunuza ulaşıp ulaşmadığını kontrol edin.')
+    :(english?'The notification could not be sent. Check your internet connection and ntfy settings.':'Bildirim gönderilemedi. İnternet bağlantısını ve ntfy ayarlarını kontrol edin.'));
 }
 function updatePanelSoundButton(){
   const b=$('panelSoundBtn');if(!b)return;
-  b.textContent='🔔 Zil + Sesli Anons · Test Et';
+  b.textContent=appLanguage==='en'?'🔔 Bell + Voice Announcement · Test':'🔔 Zil + Sesli Anons · Test Et';
   b.classList.add('primary');
-  b.title='Kısa zilin ardından Türkçe sesle “Dikkat! Yeni arıza bildirimi geldi.” anonsunu test eder.';
+  b.title=appLanguage==='en'?'Tests a short bell followed by an English voice announcement.':'Kısa zilin ardından Türkçe sesle “Dikkat! Yeni arıza bildirimi geldi.” anonsunu test eder.';
 }
 async function unlockPanelSound(){
   if(!panelSoundEnabled)return false;
@@ -496,21 +635,17 @@ function playShortFaultChime(){
 }
 function speakFaultAnnouncement(){
   if(!panelSoundEnabled)return;
-  if(!('speechSynthesis' in window)||!window.SpeechSynthesisUtterance){
-    console.warn('Bu tarayıcı Türkçe sesli anons özelliğini desteklemiyor.');
-    return;
-  }
+  if(!('speechSynthesis' in window)||!window.SpeechSynthesisUtterance)return;
   try{
-    const utterance=new SpeechSynthesisUtterance('Dikkat! Yeni arıza bildirimi geldi.');
-    utterance.lang='tr-TR';
-    utterance.rate=.96;
-    utterance.pitch=1;
-    utterance.volume=1;
-    const voices=window.speechSynthesis.getVoices();
-    const turkishVoice=voices.find(v=>(v.lang||'').toLowerCase().startsWith('tr'));
-    if(turkishVoice)utterance.voice=turkishVoice;
+    const english=appLanguage==='en';
+    const utterance=new SpeechSynthesisUtterance(english?'Attention! A new fault report has arrived.':'Dikkat! Yeni arıza bildirimi geldi.');
+    utterance.lang=english?'en-US':'tr-TR';
+    utterance.rate=.96;utterance.pitch=1;utterance.volume=1;
+    const prefix=english?'en':'tr';
+    const voice=window.speechSynthesis.getVoices().find(v=>(v.lang||'').toLowerCase().startsWith(prefix));
+    if(voice)utterance.voice=voice;
     window.speechSynthesis.speak(utterance);
-  }catch(error){console.warn('Sesli arıza anonsu başlatılamadı:',error);}
+  }catch(error){console.warn('Fault announcement could not start:',error);}
 }
 function playNewFaultSound(){
   if(!panelSoundEnabled)return;
@@ -546,7 +681,7 @@ function statusText(){
 function fmtDur(m){m=Math.max(0,Math.round(m));if(m<60)return m+' dk';if(m<1440)return Math.floor(m/60)+' sa '+(m%60)+' dk';return Math.floor(m/1440)+' gün '+Math.floor((m%1440)/60)+' sa';}
 function setStatusFilter(v){if(v==='Tamamlandı'){switchArchiveTab(true);return;}const f=$('statusFilter');f.value=(f.value===v&&!archiveMode)?'ALL':v;if(archiveMode){switchArchiveTab(false);return;}renderTickets();}
 function showSection(id){
-  if(id==='pano-section'&&!ustaLoggedIn){const p=prompt('Bakım paneline erişmek için bakımcı şifresini giriniz:');if(p!==USTA_SIFRESI){if(p!==null)alert('Hatalı şifre.');return false;}ustaLoggedIn=true;raporUnlocked=true;rememberUstaLogin(true);$('lockStatusText').textContent='Bakımcı Oturumu Açık';}
+  if(id==='pano-section'&&!ustaLoggedIn){const p=prompt(tr('Bakım paneline erişmek için bakımcı şifresini giriniz:'));if(p!==USTA_SIFRESI){if(p!==null)alert(tr('Hatalı şifre.'));return false;}ustaLoggedIn=true;raporUnlocked=true;rememberUstaLogin(true);$('lockStatusText').textContent='Bakımcı Oturumu Açık';}
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.sec===id));
   ['form-section','pano-section','rapor-section'].forEach(x=>$(x).classList.add('hidden'));
   $(id).classList.remove('hidden');
@@ -555,12 +690,14 @@ function showSection(id){
   return true;
 }
 function handleReportNav(){
-  if(!raporUnlocked){const p=prompt('Rapor sayfasına erişmek için bakımcı şifresini giriniz:');if(p===USTA_SIFRESI){raporUnlocked=true;ustaLoggedIn=true;rememberUstaLogin(true);const lockText=$('lockStatusText');if(lockText)lockText.textContent='Bakımcı Oturumu Açık';}else{if(p!==null)alert('Hatalı şifre.');return;}}
+  if(!raporUnlocked){const p=prompt(tr('Rapor sayfasına erişmek için bakımcı şifresini giriniz:'));if(p===USTA_SIFRESI){raporUnlocked=true;ustaLoggedIn=true;rememberUstaLogin(true);const lockText=$('lockStatusText');if(lockText)lockText.textContent='Bakımcı Oturumu Açık';}else{if(p!==null)alert(tr('Hatalı şifre.'));return;}}
   showSection('rapor-section');
 }
 function openSettings(){
   const connected=!!(firebaseReady&&firebaseAuthReady&&databaseReadReady&&databaseWriteReady&&!lastSyncError);
-  $('settingsMessage').textContent='Firebase bağlantısı arka planda otomatik kontrol edilir. Şu an: '+(connected?'Bağlı':'Bağlı değil')+'. Kontrol bağlantı açıldığında, yeniden bağlandığında, sayfaya dönüldüğünde ve 5 dakikada bir yapılır.';
+  $('settingsMessage').textContent=appLanguage==='en'
+    ?'The Firebase connection is checked automatically in the background. Current status: '+(connected?'Connected':'Disconnected')+'. Checks run on connection, reconnection, return to the page, and every 5 minutes.'
+    :'Firebase bağlantısı arka planda otomatik kontrol edilir. Şu an: '+(connected?'Bağlı':'Bağlı değil')+'. Kontrol bağlantı açıldığında, yeniden bağlandığında, sayfaya dönüldüğünde ve 5 dakikada bir yapılır.';
   $('settingsModal').classList.remove('hidden');
 }
 async function copyNtfyTopic(){try{await navigator.clipboard.writeText(NTFY_TOPIC);alert('Bildirim kanalı kopyalandı.');}catch(e){prompt('Bildirim kanalı:',NTFY_TOPIC);}}
@@ -675,25 +812,25 @@ async function handleFormSubmit(e){
   e.preventDefault();
   const btn=$('submitBtn');
   btn.disabled=true;
-  btn.textContent='Kaydediliyor…';
+  btn.textContent=tr('Kaydediliyor…');
   try{
     const lokasyon=$('lokasyonInput').value.trim().toLocaleUpperCase('tr-TR'),bildiren=$('bildirenInput').value.trim().toLocaleUpperCase('tr-TR'),aciklama=$('aciklamaInput').value.trim();
-    if(bildiren.length<4)throw new Error('Bildiren kişi adı en az 4 karakter olmalı.');
-    if(!lokasyon||!aciklama)throw new Error('Lokasyon ve açıklama zorunludur.');
-    const ticket={id:Date.now()+'-'+Math.floor(Math.random()*10000),kayitNo:'ARZ-ATANIYOR',tarihStr:new Date().toLocaleString('tr-TR'),rawDate:new Date().toISOString(),lokasyon,bildiren,aciklama,fotograflar:tempPhotos.filter(Boolean),statu:'Bekliyor',ustalar:[],teknikNot:'',ilkMudahaleTarihi:null,kapanisTarihi:null,sureDakika:0,islemGecmisi:[{rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:'SİSTEM',islem:'Arıza bildirildi.'}]};
+    if(bildiren.length<4)throw new Error(tr('Bildiren kişi adı en az 4 karakter olmalı.'));
+    if(!lokasyon||!aciklama)throw new Error(tr('Lokasyon ve açıklama zorunludur.'));
+    const ticket={id:Date.now()+'-'+Math.floor(Math.random()*10000),kayitNo:'ARZ-ATANIYOR',tarihStr:new Date().toLocaleString('tr-TR'),rawDate:new Date().toISOString(),lokasyon,bildiren,aciklama,fotograflar:tempPhotos.filter(Boolean),statu:'Bekliyor',ustalar:[],teknikNot:'',ilkMudahaleTarihi:null,kapanisTarihi:null,sureDakika:0,islemGecmisi:[{rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:tr('SİSTEM'),islem:tr('Arıza bildirildi.')}]};
     await createRemoteTicket(ticket);
     sendNotification('Yeni arıza bildirimi',ticket.kayitNo+' · '+ticket.lokasyon+' · '+ticket.bildiren+'\n'+ticket.aciklama).then(ok=>{if(!ok)console.warn('Yeni arıza bildirimi gönderilemedi.');});
     upsertLocalTicket(ticket.remoteId,ticket,false);
     rebuildMemories();
     $('arizaForm').reset();
     removePhoto(null,1);removePhoto(null,2);
-    alert('Arıza bildirimi kaydedildi. Kayıt No: '+ticket.kayitNo);
+    alert(tr('Arıza bildirimi kaydedildi. Kayıt No:')+' '+ticket.kayitNo);
     showSection('pano-section');
   }catch(err){
-    alert('Kayıt yapılamadı: '+err.message);
+    alert(tr('Kayıt yapılamadı:')+' '+err.message);
   }finally{
     btn.disabled=false;
-    btn.textContent='BİLDİRİMİ GÖNDER';
+    btn.textContent=tr('BİLDİRİMİ GÖNDER');
   }
 }
 
@@ -714,7 +851,7 @@ function toggleUstaLock(){
     rememberUstaLogin(true);
     $('lockStatusText').textContent='Bakımcı Oturumu Açık';
     renderTickets();
-  }else if(p!==null)alert('Hatalı şifre.');
+  }else if(p!==null)alert(tr('Hatalı şifre.'));
 }
 function switchArchiveTab(v){archiveMode=v;$('activeTab').classList.toggle('active',!v);$('archiveTab').classList.toggle('active',v);$('statusFilter').classList.toggle('hidden',v);renderTickets();}
 function badgeClass(s){return {'İşlemde':'islem','Parça Bekliyor':'parca','Servis Bekliyor':'servis','Tamamlandı':'tamam'}[s]||'';}
@@ -743,43 +880,58 @@ async function mutateTicket(id,fn){
   return fresh;
 }
 
-async function addTechnician(id){const input=$('usta-'+id),name=(input?.value||'').trim().toLocaleUpperCase('tr-TR');if(name.length<4){alert('Teknisyen adı en az 4 karakter olmalı.');return;}let actor=currentActor();if(actor.length<4){actor=name;$('currentActor').value=actor;}try{await mutateTicket(id,t=>{if(!t.ustalar.includes(name))t.ustalar.push(name);addHistory(t,actor,`${name} eklendi.`);});if(input)input.value='';}catch(e){alert(e.message);}}
+async function addTechnician(id){const input=$('usta-'+id),name=(input?.value||'').trim().toLocaleUpperCase('tr-TR');if(name.length<4){alert(tr('Teknisyen adı en az 4 karakter olmalı.'));return;}let actor=currentActor();if(actor.length<4){actor=name;$('currentActor').value=actor;}try{await mutateTicket(id,t=>{if(!t.ustalar.includes(name))t.ustalar.push(name);addHistory(t,actor,`${name} eklendi.`);});if(input)input.value='';}catch(e){alert(e.message);}}
 function addHistory(t,actor,action){t.islemGecmisi.push({rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:actor,islem:action});}
-async function saveTechnicianNote(id){const actor=currentActorFor(id),note=$('not-'+id)?.value.trim()||'';if(actor.length<4||!note){alert('Teknisyen adı ve not zorunludur.');return;}try{await mutateTicket(id,t=>{t.teknikNot=note;addHistory(t,actor,'Not: '+note);if(!t.ustalar.includes(actor))t.ustalar.push(actor);});alert('Kaydedildi.');}catch(e){alert(e.message);}}
-async function updateTicketStatus(id,status){const actor=currentActorFor(id),note=$('not-'+id)?.value.trim()||'';if(actor.length<4){alert('Teknisyen adını girin.');return;}if(status==='Tamamlandı'&&!note){alert('Çözüm açıklaması yazın.');return;}try{await mutateTicket(id,t=>{const now=new Date();if(status!=='Bekliyor'&&!t.ilkMudahaleTarihi)t.ilkMudahaleTarihi=now.toISOString();t.statu=status;if(note)t.teknikNot=note;if(status==='Tamamlandı'){t.kapanisTarihi=now.toISOString();t.sureDakika=Math.max(1,Math.round((now-new Date(t.rawDate))/60000));}addHistory(t,actor,`Durum "${status}" oldu.${note?' Not: '+note:''}`);if(!t.ustalar.includes(actor))t.ustalar.push(actor);});alert('Güncellendi.');}catch(e){alert(e.message);}}
-async function reopenTicket(id){const actor=currentActorFor(id);if(actor.length<4){alert('Yeniden açmak için işlemi yapan teknisyen adını girin.');return;}if(!confirm('Bu tamamlanmış arıza yeniden aktif duruma alınsın mı?'))return;try{await mutateTicket(id,t=>{t.statu='Bekliyor';t.kapanisTarihi=null;t.sureDakika=0;addHistory(t,actor,'Tamamlanan arıza yeniden açıldı.');if(!t.ustalar.includes(actor))t.ustalar.push(actor);});switchArchiveTab(false);alert('Arıza yeniden açıldı.');}catch(e){alert(e.message);}}
+async function saveTechnicianNote(id){const actor=currentActorFor(id),note=$('not-'+id)?.value.trim()||'';if(actor.length<4||!note){alert(tr('Teknisyen adı ve not zorunludur.'));return;}try{await mutateTicket(id,t=>{t.teknikNot=note;addHistory(t,actor,'Not: '+note);if(!t.ustalar.includes(actor))t.ustalar.push(actor);});alert(tr('Kaydedildi.'));}catch(e){alert(e.message);}}
+async function updateTicketStatus(id,status){const actor=currentActorFor(id),note=$('not-'+id)?.value.trim()||'';if(actor.length<4){alert(tr('Teknisyen adını girin.'));return;}if(status==='Tamamlandı'&&!note){alert(tr('Çözüm açıklaması yazın.'));return;}try{await mutateTicket(id,t=>{const now=new Date();if(status!=='Bekliyor'&&!t.ilkMudahaleTarihi)t.ilkMudahaleTarihi=now.toISOString();t.statu=status;if(note)t.teknikNot=note;if(status==='Tamamlandı'){t.kapanisTarihi=now.toISOString();t.sureDakika=Math.max(1,Math.round((now-new Date(t.rawDate))/60000));}addHistory(t,actor,`Durum "${status}" oldu.${note?' Not: '+note:''}`);if(!t.ustalar.includes(actor))t.ustalar.push(actor);});alert(tr('Güncellendi.'));}catch(e){alert(e.message);}}
+async function reopenTicket(id){const actor=currentActorFor(id);if(actor.length<4){alert(tr('Yeniden açmak için işlemi yapan teknisyen adını girin.'));return;}if(!confirm(tr('Bu tamamlanmış arıza yeniden aktif duruma alınsın mı?')))return;try{await mutateTicket(id,t=>{t.statu='Bekliyor';t.kapanisTarihi=null;t.sureDakika=0;addHistory(t,actor,'Tamamlanan arıza yeniden açıldı.');if(!t.ustalar.includes(actor))t.ustalar.push(actor);});switchArchiveTab(false);alert(tr('Arıza yeniden açıldı.'));}catch(e){alert(e.message);}}
 
 function openModal(src){$('modalImg').src=src;$('imageModal').classList.remove('hidden')}function closeModal(){$('imageModal').classList.add('hidden');$('modalImg').src='';}
 function monthKey(t){const d=new Date(t.rawDate);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function populateMonthDropdown(){const s=$('aySecimi');if(!s)return;const old=s.value;s.innerHTML='<option value="ALL">Tüm zamanlar</option>';const months=[...new Set(arizaKayitlari.map(monthKey))].sort().reverse();const names=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];months.forEach(k=>{const [y,m]=k.split('-');s.add(new Option(`${y} - ${names[Number(m)-1]}`,k));});if([...s.options].some(o=>o.value===old))s.value=old;}
+function populateMonthDropdown(){
+  const select=$('aySecimi');if(!select)return;
+  const old=select.value;
+  select.innerHTML='<option value="ALL">'+tr('Tüm zamanlar')+'</option>';
+  const months=[...new Set(arizaKayitlari.map(monthKey))].sort().reverse();
+  const names=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  months.forEach(k=>{const [year,month]=k.split('-');select.add(new Option(year+' - '+tr(names[Number(month)-1]),k));});
+  if([...select.options].some(o=>o.value===old))select.value=old;
+}
 function getReportData(){const m=$('aySecimi').value,st=$('reportStatus').value,loc=$('reportLocation').value.trim().toLocaleUpperCase('tr-TR'),rep=$('reportReporter').value.trim().toLocaleUpperCase('tr-TR'),tech=$('reportTechnician').value.trim().toLocaleUpperCase('tr-TR');return arizaKayitlari.filter(t=>(m==='ALL'||monthKey(t)===m)&&(st==='ALL'||t.statu===st)&&(!loc||t.lokasyon.toLocaleUpperCase('tr-TR').includes(loc))&&(!rep||t.bildiren.toLocaleUpperCase('tr-TR').includes(rep))&&(!tech||((t.ustalar||[]).some(x=>x.toLocaleUpperCase('tr-TR').includes(tech))||(t.islemGecmisi||[]).some(h=>(h.eylemYapan||'').toLocaleUpperCase('tr-TR').includes(tech)))));}
 function updateRaporSummary(){const d=getReportData(),done=d.filter(t=>t.statu==='Tamamlandı');$('raporOzet').innerHTML=`<div class="stats"><div class="stat"><span>Filtrelenen</span><strong>${d.length}</strong></div><div class="stat tamam"><span>Tamamlanan</span><strong>${done.length}</strong></div><div class="stat acik"><span>Açık</span><strong>${d.length-done.length}</strong></div></div>`;$('reportPreview').textContent=d.length?`Kayıtlar listeleniyor.`:'Kayıt yok.';}
 function exportToExcel(){
-  if(typeof XLSX==='undefined'){alert('Excel bileşeni yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenileyin.');return;}
-  const d=getReportData();
-  if(!d.length){alert('Seçili filtrelere uygun kayıt bulunamadı.');return;}
-  const rows=d.map(t=>({
-    'Kayıt No':t.kayitNo,'Bildirim Tarihi':t.tarihStr,'Lokasyon':t.lokasyon,'Bildiren':t.bildiren,
-    'Açıklama':t.aciklama,'Durum':t.statu,'Teknisyenler':(t.ustalar||[]).join(', '),
-    'İlk Müdahale':t.ilkMudahaleTarihi?new Date(t.ilkMudahaleTarihi).toLocaleString('tr-TR'):'',
-    'Kapanış':t.kapanisTarihi?new Date(t.kapanisTarihi).toLocaleString('tr-TR'):'',
-    'Toplam Süre (dk)':t.sureDakika||'','Teknik Not':t.teknikNot||'','Fotoğraf Sayısı':(t.fotograflar||[]).length
+  if(typeof XLSX==='undefined'){alert(tr('Excel bileşeni yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenileyin.'));return;}
+  const data=getReportData();
+  if(!data.length){alert(tr('Seçili filtrelere uygun kayıt bulunamadı.'));return;}
+  const h={
+    no:tr('Kayıt No'),date:tr('Bildirim Tarihi'),loc:tr('Lokasyon'),reporter:tr('Bildiren'),
+    desc:tr('Açıklama'),status:tr('Durum'),techs:tr('Teknisyenler'),first:tr('İlk Müdahale'),
+    closed:tr('Kapanış'),duration:tr('Toplam Süre (dk)'),note:tr('Teknik Not'),photos:tr('Fotoğraf Sayısı'),
+    actionDate:tr('İşlem Tarihi'),by:tr('İşlemi Yapan'),action:tr('İşlem / Açıklama')
+  };
+  const rows=data.map(t=>({
+    [h.no]:t.kayitNo,[h.date]:t.tarihStr,[h.loc]:t.lokasyon,[h.reporter]:t.bildiren,
+    [h.desc]:t.aciklama,[h.status]:tr(t.statu),[h.techs]:(t.ustalar||[]).join(', '),
+    [h.first]:t.ilkMudahaleTarihi?new Date(t.ilkMudahaleTarihi).toLocaleString(appLanguage==='en'?'en-US':'tr-TR'):'',
+    [h.closed]:t.kapanisTarihi?new Date(t.kapanisTarihi).toLocaleString(appLanguage==='en'?'en-US':'tr-TR'):'',
+    [h.duration]:t.sureDakika||'',[h.note]:t.teknikNot||'',[h.photos]:(t.fotograflar||[]).length
   }));
   const history=[];
-  d.forEach(t=>(t.islemGecmisi||[]).forEach(h=>history.push({
-    'Kayıt No':t.kayitNo,'Lokasyon':t.lokasyon,'İşlem Tarihi':h.zaman||'',
-    'İşlemi Yapan':h.eylemYapan||'','İşlem / Açıklama':h.islem||''
+  data.forEach(t=>(t.islemGecmisi||[]).forEach(item=>history.push({
+    [h.no]:t.kayitNo,[h.loc]:t.lokasyon,[h.actionDate]:item.zaman||'',
+    [h.by]:item.eylemYapan||'',[h.action]:item.islem||''
   })));
-  const wb=XLSX.utils.book_new();
+  const workbook=XLSX.utils.book_new();
   const ws1=XLSX.utils.json_to_sheet(rows);
-  const ws2=XLSX.utils.json_to_sheet(history.length?history:[{'Bilgi':'Seçili kayıtlar için işlem geçmişi bulunmuyor.'}]);
-  XLSX.utils.book_append_sheet(wb,ws1,'Arızalar');
-  XLSX.utils.book_append_sheet(wb,ws2,'İşlem Geçmişi');
-  XLSX.writeFile(wb,'Ariza_Raporu.xlsx');
+  const ws2=XLSX.utils.json_to_sheet(history.length?history:[{[tr('Bilgi')]:tr('Seçili kayıtlar için işlem geçmişi bulunmuyor.')}]);
+  XLSX.utils.book_append_sheet(workbook,ws1,tr('Arızalar'));
+  XLSX.utils.book_append_sheet(workbook,ws2,tr('İşlem Geçmişi'));
+  XLSX.writeFile(workbook,appLanguage==='en'?'Fault_Report.xlsx':'Ariza_Raporu.xlsx');
 }
 
 document.addEventListener('DOMContentLoaded',async()=>{
   try{
+    initializeLanguage();
     if(ustaLoggedIn){const lockText=$('lockStatusText');if(lockText)lockText.textContent='Bakımcı Oturumu Açık';}
     renderTickets();populateMonthDropdown();updateRaporSummary();updatePanelSoundButton();
     await initializeFirebase();
