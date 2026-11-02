@@ -285,7 +285,7 @@ textarea{resize:vertical;min-height:92px}
   </section>
 
   <section id="pano-section" class="card hidden">
-    <div class="card-title"><span>Bakım Yönetim Panosu</span><div class="row"><button class="btn small" onclick="syncAll(true)">↻ Yenile</button><button id="panelSoundBtn" class="btn small" onclick="togglePanelSound()">🔕 Sesli Uyarı Kapalı</button><button class="btn small" onclick="toggleUstaLock()"><span id="lockStatusText">Bakımcı Girişi</span></button></div></div>
+    <div class="card-title"><span>Bakım Yönetim Panosu</span><div class="row"><button class="btn small" onclick="syncAll(true)">↻ Yenile</button><button id="panelSoundBtn" class="btn small" onclick="testPanelSound()">🔕 Sesli Uyarı Kapalı</button><button class="btn small" onclick="toggleUstaLock()"><span id="lockStatusText">Bakımcı Girişi</span></button></div></div>
     <div class="group"><label for="currentActor">İşlemi yapan teknisyen (isteğe bağlı; boşsa eklenen teknisyen adı kullanılır)</label><input id="currentActor" class="input" list="ustaHafiza" placeholder="Kendi adınızı yazabilirsiniz" oninput="formatUpper(this)"><datalist id="ustaHafiza"></datalist></div>
     <div class="counter-grid" id="counterGrid"><button class="counter c-bekliyor" data-st="Bekliyor" onclick="setStatusFilter('Bekliyor')"><span>Bekliyor</span><strong id="countBekliyor">0</strong></button><button class="counter c-islem" data-st="İşlemde" onclick="setStatusFilter('İşlemde')"><span>İşlemde</span><strong id="countIslemde">0</strong></button><button class="counter c-parca" data-st="Parça Bekliyor" onclick="setStatusFilter('Parça Bekliyor')"><span>Parça Bekliyor</span><strong id="countParca">0</strong></button><button class="counter c-servis" data-st="Servis Bekliyor" onclick="setStatusFilter('Servis Bekliyor')"><span>Servis Bekliyor</span><strong id="countServis">0</strong></button><button class="counter c-tamam" data-st="Tamamlandı" onclick="setStatusFilter('Tamamlandı')"><span>Tamamlandı</span><strong id="countTamam">0</strong></button></div>
     <div class="tabbar"><button id="activeTab" class="btn tab active" onclick="switchArchiveTab(false)">Aktif Arızalar</button><button id="archiveTab" class="btn tab" onclick="switchArchiveTab(true)">Tamamlananlar</button></div>
@@ -359,8 +359,9 @@ let syncBusy=false;
 let lastSyncAt=null;
 let lastSyncError='';
 let initialSyncComplete=false;
-let panelSoundEnabled=false;
+let panelSoundEnabled=true;
 let panelAudioContext=null;
+let pendingPanelSound=false;
 const USTA_SIFRESI='4535';
 const NTFY_TOPIC='fabrika-ariza-manisa-8f62c91d';
 let ntfyTopic=NTFY_TOPIC;
@@ -411,16 +412,64 @@ async function sendTestNotification(){
   const ok=await sendNotification('Arıza Takip Test Bildirimi','Bildirim bağlantısı çalışıyor. Bu mesajı aldıysanız ntfy kurulumu başarılı.');
   alert(ok?'Test bildirimi ntfy kanalına gönderildi. Telefonunuza ulaşıp ulaşmadığını kontrol edin.':'Bildirim gönderilemedi. İnternet bağlantısını ve tarayıcı konsolundaki ntfy hatasını kontrol edin.');
 }
-function updatePanelSoundButton(){const b=$('panelSoundBtn');if(!b)return;b.textContent=panelSoundEnabled?'🔔 Sesli Uyarı Açık':'🔕 Sesli Uyarı Kapalı';b.classList.toggle('primary',panelSoundEnabled);}
+function updatePanelSoundButton(){
+  const b=$('panelSoundBtn');if(!b)return;
+  b.textContent='🔔 Sesli Uyarı Açık · Test Et';
+  b.classList.add('primary');
+  b.title='5,5 saniyelik alarmı dinlemek için tıklayın. Tarayıcı sesi ilk ekran etkileşiminde açılır.';
+}
+async function unlockPanelSound(){
+  if(!panelSoundEnabled)return false;
+  try{
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextClass)throw new Error('Bu tarayıcı sesli uyarıyı desteklemiyor.');
+    if(!panelAudioContext)panelAudioContext=new AudioContextClass();
+    if(panelAudioContext.state==='suspended')await panelAudioContext.resume();
+    const active=panelAudioContext.state==='running';
+    if(active&&pendingPanelSound){pendingPanelSound=false;playNewFaultSound();}
+    return active;
+  }catch(error){console.warn('Ses etkinleştirilemedi:',error);return false;}
+}
 function playNewFaultSound(){
-  if(!panelSoundEnabled||!panelAudioContext)return;
-  try{const ctx=panelAudioContext;[880,1175].forEach((frequency,index)=>{const osc=ctx.createOscillator(),gain=ctx.createGain(),at=ctx.currentTime+index*.18;osc.type='sine';osc.frequency.setValueAtTime(frequency,at);gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.22,at+.025);gain.gain.exponentialRampToValueAtTime(.0001,at+.16);osc.connect(gain);gain.connect(ctx.destination);osc.start(at);osc.stop(at+.17);});}catch(error){console.warn('Sesli uyarı çalınamadı:',error);}
+  if(!panelSoundEnabled)return;
+  if(!panelAudioContext||panelAudioContext.state!=='running'){
+    pendingPanelSound=true;
+    return;
+  }
+  try{
+    const ctx=panelAudioContext;
+    const groupGap=1.12, pulseGap=.37, pulseDuration=.25;
+    // Beş grup halinde üç güçlü alarm darbesi: toplam yaklaşık 5,5 saniye.
+    for(let group=0;group<5;group++){
+      for(let pulse=0;pulse<3;pulse++){
+        const at=ctx.currentTime+group*groupGap+pulse*pulseGap;
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.type='square';
+        const frequency=(group+pulse)%2===0?920:1180;
+        osc.frequency.setValueAtTime(frequency,at);
+        osc.frequency.linearRampToValueAtTime(frequency===920?1080:980,at+pulseDuration);
+        gain.gain.setValueAtTime(.0001,at);
+        gain.gain.linearRampToValueAtTime(.58,at+.012);
+        gain.gain.setValueAtTime(.58,at+pulseDuration-.035);
+        gain.gain.exponentialRampToValueAtTime(.0001,at+pulseDuration);
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.start(at);osc.stop(at+pulseDuration+.01);
+      }
+    }
+  }catch(error){console.warn('Sesli uyarı çalınamadı:',error);}
 }
-async function togglePanelSound(){
-  if(panelSoundEnabled){panelSoundEnabled=false;updatePanelSoundButton();return;}
-  try{const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(!AudioContextClass)throw new Error('Bu tarayıcı sesli uyarıyı desteklemiyor.');if(!panelAudioContext)panelAudioContext=new AudioContextClass();await panelAudioContext.resume();panelSoundEnabled=true;updatePanelSoundButton();playNewFaultSound();}
-  catch(error){panelSoundEnabled=false;updatePanelSoundButton();alert(error.message||'Ses etkinleştirilemedi.');}
+async function testPanelSound(){
+  panelSoundEnabled=true;
+  updatePanelSoundButton();
+  const ready=await unlockPanelSound();
+  if(!ready){alert('Ses açılamadı. Sayfanın içine bir kez tıklayın ve tarayıcı ses izinlerini kontrol edin.');return;}
+  pendingPanelSound=false;
+  playNewFaultSound();
 }
+document.addEventListener('pointerdown',()=>{
+  if(panelSoundEnabled&&(!panelAudioContext||panelAudioContext.state!=='running'))void unlockPanelSound();
+},{capture:true});
 function escapeHTML(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function formatUpper(el){const p=el.selectionStart;el.value=el.value.toLocaleUpperCase('tr-TR');try{el.setSelectionRange(p,p)}catch(e){}}
 function statusText(){
