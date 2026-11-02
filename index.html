@@ -311,7 +311,6 @@ textarea{resize:vertical;min-height:92px}
 <div id="settingsModal" class="modal hidden"><div class="modal-box">
   <div class="card-title">Veritabanı Bağlantı Durumu</div>
   <div id="settingsMessage" class="muted" style="margin-top:10px">Firebase Realtime Database kullanılır. Yeni arızalar ve güncellemeler bağlı cihazlara anlık aktarılır. Yeni arıza bildirimi ntfy üzerinden gönderilir.</div>
-  <div class="row" style="margin-top:12px"><button class="btn primary" onclick="testFirebaseAccess()">Firebase Okuma / Yazma Testi</button></div>
   <div class="group" style="margin-top:16px"><label>Bakım ekibi bildirim kanalı</label><div class="row"><input id="ntfyTopicView" class="input" readonly value="fabrika-ariza-manisa-8f62c91d" style="flex:1"><button class="btn small" onclick="copyNtfyTopic()">Kopyala</button><button class="btn small primary" onclick="sendTestNotification()">Test Bildirimi</button></div><div class="muted">Bakım ekibi ntfy uygulamasında bu kanala abone olursa yeni arıza bildirimlerini alır.</div></div>
   <div class="row" style="justify-content:flex-end; margin-top:15px"><button class="btn" onclick="closeSettings()">Kapat</button></div>
 </div></div>
@@ -338,6 +337,10 @@ let firebaseReady = false;
 let firebaseAuthReady = false;
 let databaseReadReady = false;
 let databaseWriteReady = false;
+let healthCheckInFlight = false;
+let healthCheckTimer = null;
+let lastHealthCheckAt = 0;
+const HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000;
 let realtimeListenersStarted = false;
 let realtimeLoading = false;
 let realtimeStartPromise = null;
@@ -381,18 +384,51 @@ async function initializeFirebase(){
   if(!auth.currentUser) await auth.signInAnonymously();
   if(!auth.currentUser) throw new Error('Firebase anonim oturumu açılamadı.');
   firebaseAuthReady=true;
+
+  let previousConnection=false;
   firebaseDb.ref('.info/connected').on('value',snap=>{
-    firebaseReady=snap.val()===true;
+    const connected=snap.val()===true;
+    firebaseReady=connected;
+    if(!connected){databaseReadReady=false;databaseWriteReady=false;}
     statusText();
+    if(connected&&!previousConnection)void runFirebaseHealthCheck();
+    previousConnection=connected;
   },err=>{
-    firebaseReady=false;
-    databaseReadReady=false;
-    databaseWriteReady=false;
+    firebaseReady=false;databaseReadReady=false;databaseWriteReady=false;
     lastSyncError=(err.code?err.code+' — ':'')+(err.message||String(err));
     statusText();
   });
+
+  if(!healthCheckTimer)healthCheckTimer=setInterval(()=>{void runFirebaseHealthCheck();},HEALTH_CHECK_INTERVAL_MS);
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&Date.now()-lastHealthCheckAt>60000)void runFirebaseHealthCheck();
+  });
 }
 
+async function runFirebaseHealthCheck(){
+  if(healthCheckInFlight)return false;
+  if(!firebaseDb||!firebaseAuthReady||!firebase.auth().currentUser||!firebaseReady){
+    databaseReadReady=false;databaseWriteReady=false;statusText();return false;
+  }
+  healthCheckInFlight=true;
+  try{
+    const uid=firebase.auth().currentUser.uid;
+    // Aynı kullanıcı için tek kontrol kaydı tutulur; yeni kayıt biriktirilmez.
+    const probeRef=firebaseDb.ref('system/healthChecks/'+uid);
+    const token=Date.now()+'-'+Math.random().toString(36).slice(2,10);
+    await probeRef.set({token,checkedAt:firebase.database.ServerValue.TIMESTAMP,projectId:FIREBASE_CONFIG.projectId});
+    const snapshot=await probeRef.once('value');
+    const saved=snapshot.val();
+    if(!snapshot.exists()||!saved||saved.token!==token)throw new Error('Kontrol kaydı Firebase’den geri okunamadı.');
+    databaseReadReady=true;databaseWriteReady=true;lastHealthCheckAt=Date.now();lastSyncError='';statusText();
+    return true;
+  }catch(error){
+    databaseReadReady=false;databaseWriteReady=false;
+    lastSyncError=(error?.code?error.code+' — ':'')+(error?.message||String(error));
+    console.warn('Firebase otomatik bağlantı testi başarısız:',lastSyncError);
+    statusText();return false;
+  }finally{healthCheckInFlight=false;}
+}
 async function sendNotification(title,message){
   const topic=String(ntfyTopic||NTFY_TOPIC||'').trim();
   if(!topic)return false;
@@ -474,13 +510,9 @@ function escapeHTML(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 function formatUpper(el){const p=el.selectionStart;el.value=el.value.toLocaleUpperCase('tr-TR');try{el.setSelectionRange(p,p)}catch(e){}}
 function statusText(){
   const el=$('connectionStatus');if(!el)return;
-  if(lastSyncError){el.className='statusline err';el.textContent='Firebase veri erişim hatası: '+lastSyncError;return;}
-  if(!firebaseReady){el.className='statusline warn';el.textContent='Firebase sunucusuna bağlanıyor…';return;}
-  if(!firebaseAuthReady){el.className='statusline warn';el.textContent='Firebase oturumu doğrulanıyor…';return;}
-  if(!databaseReadReady){el.className='statusline warn';el.textContent='Firebase bağlantısı kuruldu · Veritabanı okuması doğrulanıyor…';return;}
-  if(!databaseWriteReady){el.className='statusline warn';el.textContent='Firebase okuma aktif · Yazma henüz doğrulanmadı';return;}
-  el.className='statusline ok';
-  el.textContent='☁ Firebase okuma/yazma aktif · Canlı eşitleme'+(lastSyncAt?' · '+lastSyncAt.toLocaleTimeString('tr-TR'):'');
+  const connected=!!(firebaseReady&&firebaseAuthReady&&databaseReadReady&&databaseWriteReady&&!lastSyncError);
+  el.className=connected?'statusline ok':'statusline err';
+  el.textContent=connected?'☁ Bağlı':'⚠ Bağlı değil';
 }
 function fmtDur(m){m=Math.max(0,Math.round(m));if(m<60)return m+' dk';if(m<1440)return Math.floor(m/60)+' sa '+(m%60)+' dk';return Math.floor(m/1440)+' gün '+Math.floor((m%1440)/60)+' sa';}
 function setStatusFilter(v){if(v==='Tamamlandı'){switchArchiveTab(true);return;}const f=$('statusFilter');f.value=(f.value===v&&!archiveMode)?'ALL':v;if(archiveMode){switchArchiveTab(false);return;}renderTickets();}
@@ -498,39 +530,9 @@ function handleReportNav(){
   showSection('rapor-section');
 }
 function openSettings(){
-  $('settingsMessage').textContent='Proje: '+FIREBASE_CONFIG.projectId+' · Veritabanı: '+FIREBASE_CONFIG.databaseURL+
-    ' · Ağ: '+(firebaseReady?'Bağlı':'Bağlı değil')+
-    ' · Anonim oturum: '+(firebaseAuthReady?'Açık':'Kapalı')+
-    ' · Okuma: '+(databaseReadReady?'Doğrulandı':'Doğrulanmadı')+
-    ' · Yazma: '+(databaseWriteReady?'Doğrulandı':'Doğrulanmadı');
+  const connected=!!(firebaseReady&&firebaseAuthReady&&databaseReadReady&&databaseWriteReady&&!lastSyncError);
+  $('settingsMessage').textContent='Firebase bağlantısı arka planda otomatik kontrol edilir. Şu an: '+(connected?'Bağlı':'Bağlı değil')+'. Kontrol bağlantı açıldığında, yeniden bağlandığında, sayfaya dönüldüğünde ve 5 dakikada bir yapılır.';
   $('settingsModal').classList.remove('hidden');
-}
-async function testFirebaseAccess(){
-  const button=document.querySelector('#settingsModal button[onclick="testFirebaseAccess()"]');
-  const message=$('settingsMessage');
-  if(button){button.disabled=true;button.textContent='Test ediliyor…';}
-  try{
-    if(!firebaseDb)throw new Error('Firebase veritabanı nesnesi başlatılmamış.');
-    const user=firebase.auth().currentUser;
-    if(!user)throw new Error('Anonim Firebase oturumu bulunamadı.');
-    const testAt=new Date().toISOString();
-    const testRef=firebaseDb.ref('system/connectionTest');
-    const payload={testAt,uid:user.uid,origin:location.origin,projectId:FIREBASE_CONFIG.projectId};
-    await testRef.set(payload);
-    const snap=await testRef.once('value');
-    const saved=snap.val();
-    if(!saved||saved.testAt!==testAt)throw new Error('Firebase yazdı ancak geri okuma doğrulanamadı.');
-    databaseReadReady=true;databaseWriteReady=true;lastSyncError='';lastSyncAt=new Date();statusText();
-    message.textContent='BAŞARILI: Firebase’e yazma ve geri okuma doğrulandı. Kayıt yolu: /system/connectionTest. Proje: '+FIREBASE_CONFIG.projectId+'. Uygulama adresi: '+location.origin+'.';
-    alert('Firebase yazma ve okuma testi başarılı. Firebase Console > Realtime Database > Data bölümünde system / connectionTest kaydını görebilirsin.');
-  }catch(error){
-    const detail=error?.code?error.code+' — '+error.message:(error?.message||String(error));
-    lastSyncError=detail;statusText();
-    message.textContent='BAŞARISIZ: '+detail+' | Proje: '+FIREBASE_CONFIG.projectId+' | Veritabanı: '+FIREBASE_CONFIG.databaseURL;
-    alert('Firebase testi başarısız: '+detail);
-  }finally{
-    if(button){button.disabled=false;button.textContent='Firebase Okuma / Yazma Testi';}
-  }
 }
 async function copyNtfyTopic(){try{await navigator.clipboard.writeText(NTFY_TOPIC);alert('Bildirim kanalı kopyalandı.');}catch(e){prompt('Bildirim kanalı:',NTFY_TOPIC);}}
 function closeSettings(){$('settingsModal').classList.add('hidden');}
@@ -556,6 +558,7 @@ async function createRemoteTicket(ticket){
   if(!verification.exists())throw new Error('Firebase kaydı yazdı ancak geri okuma doğrulanamadı.');
   databaseReadReady=true;
   databaseWriteReady=true;
+  lastHealthCheckAt=Date.now();
   lastSyncError='';
   lastSyncAt=new Date();
   statusText();
