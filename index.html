@@ -510,4 +510,739 @@ function switchPmBranch(branch) {
   activePmBranch = branch;
   document.getElementById("pmTabElektrik").classList.toggle("active", branch === "ELEKTRIK");
   document.getElementById("pmTabMekanik").classList.toggle("active", branch === "MEKANIK");
-  document.getElementById("pmElektrikView").classList.toggle("hidden", branch !== "ELEKTRIK
+  document.getElementById("pmElektrikView").classList.toggle("hidden", branch !== "ELEKTRIK");
+  document.getElementById("pmMekanikView").classList.toggle("hidden", branch !== "MEKANIK");
+}
+
+function getMachineLogs(code) {
+  const raw = pmLogs && pmLogs[code] ? pmLogs[code] : {};
+  const list = Array.isArray(raw) ? raw : Object.values(raw);
+  return list.filter(Boolean).sort((a, b) => (b.recordDate || b.savedAt || 0) - (a.recordDate || a.savedAt || 0));
+}
+
+function evaluateMachineSchedule(eq) {
+  const logs = getMachineLogs(eq.code);
+  const latestWaiting = logs.find(r => r.status === "Bekleyen (Malzeme Bekliyor)");
+  const latestDone = logs.find(r => r.status === "Biten");
+  const periodMs = (eq.periodDays || 30) * 86400000;
+
+  if (!latestDone) {
+    return {
+      key: "NONE",
+      label: latestWaiting ? "Malzeme Bekliyor" : "Kayıt Yok",
+      pillClass: latestWaiting ? "pm-pill-wait" : "pm-pill-none",
+      lastDoneDate: null,
+      nextDueDate: null,
+      daysLeft: null,
+      latestWaiting,
+      latestDone: null,
+      logs
+    };
+  }
+
+  const lastDoneMs = Number(latestDone.recordDate || latestDone.savedAt);
+  const nextDueMs = lastDoneMs + periodMs;
+  const daysLeft = Math.ceil((nextDueMs - Date.now()) / 86400000);
+
+  if (latestWaiting) {
+    return {
+      key: "WAITING",
+      label: `Malzeme Bekliyor · Sonraki: ${fmtShortDate(nextDueMs)}`,
+      pillClass: "pm-pill-wait",
+      lastDoneDate: lastDoneMs,
+      nextDueDate: nextDueMs,
+      daysLeft,
+      latestWaiting,
+      latestDone,
+      logs
+    };
+  }
+
+  if (daysLeft < 0) {
+    return {
+      key: "OVERDUE",
+      label: `Gecikmiş (${Math.abs(daysLeft)} gün geçti)`,
+      pillClass: "pm-pill-due",
+      lastDoneDate: lastDoneMs,
+      nextDueDate: nextDueMs,
+      daysLeft,
+      latestWaiting: null,
+      latestDone,
+      logs
+    };
+  }
+
+  if (daysLeft <= 5) {
+    return {
+      key: "DUE_SOON",
+      label: `Yaklaşan (${daysLeft === 0 ? "Bugün" : daysLeft + " gün kaldı"})`,
+      pillClass: "pm-pill-soon",
+      lastDoneDate: lastDoneMs,
+      nextDueDate: nextDueMs,
+      daysLeft,
+      latestWaiting: null,
+      latestDone,
+      logs
+    };
+  }
+
+  return {
+    key: "OK",
+    label: `Normal (${daysLeft} gün kaldı)`,
+    pillClass: "pm-pill-ok",
+    lastDoneDate: lastDoneMs,
+    nextDueDate: nextDueMs,
+    daysLeft,
+    latestWaiting: null,
+    latestDone,
+    logs
+  };
+}
+
+function setPmDueFilter(filterKey) {
+  activePmDueFilter = activePmDueFilter === filterKey && filterKey !== "ALL" ? "ALL" : filterKey;
+  document.querySelectorAll(".pm-stat").forEach(el => el.classList.toggle("active", el.dataset.pmf === activePmDueFilter));
+  populatePmSelect(false);
+}
+
+function populatePmSelect(keepCurrent) {
+  const sel = document.getElementById("pmMachineSelect");
+  const filtered = PM_EQUIPMENT.filter(eq => {
+    const st = evaluateMachineSchedule(eq);
+    if (activePmDueFilter === "DUE_SOON") return st.key === "DUE_SOON";
+    if (activePmDueFilter === "OVERDUE") return st.key === "OVERDUE";
+    if (activePmDueFilter === "WAITING") return st.key === "WAITING";
+    return true;
+  });
+
+  const list = filtered.length ? filtered : PM_EQUIPMENT;
+  if (!keepCurrent || !list.some(x => x.code === activePmCode)) {
+    activePmCode = list[0].code;
+  }
+
+  sel.innerHTML = list.map(eq => {
+    const st = evaluateMachineSchedule(eq);
+    return `<option value="${esc(eq.code)}" ${eq.code === activePmCode ? "selected" : ""}>${esc(eq.code)} — ${esc(eq.name)} [${esc(st.label)}]</option>`;
+  }).join("");
+}
+
+function getDraft(code) {
+  if (!pmDrafts[code] || typeof pmDrafts[code] !== "object") {
+    pmDrafts[code] = {
+      missingMaterial: "",
+      findings: "",
+      inspector: "",
+      dateStr: toInputDateValue(Date.now())
+    };
+  }
+  return pmDrafts[code];
+}
+
+function onPmMachineChange(code) {
+  if (!PM_BY_CODE[code]) return;
+  activePmCode = code;
+  renderPmFormForActive();
+}
+
+function renderPmView() {
+  let soonCount = 0, overdueCount = 0, waitingCount = 0;
+  PM_EQUIPMENT.forEach(eq => {
+    const st = evaluateMachineSchedule(eq);
+    if (st.key === "DUE_SOON") soonCount++;
+    if (st.key === "OVERDUE") overdueCount++;
+    if (st.key === "WAITING") waitingCount++;
+  });
+  document.getElementById("pmCountAll").textContent = PM_EQUIPMENT.length;
+  document.getElementById("pmCountSoon").textContent = soonCount;
+  document.getElementById("pmCountOverdue").textContent = overdueCount;
+  document.getElementById("pmCountWaiting").textContent = waitingCount;
+  document.querySelectorAll(".pm-stat").forEach(el => el.classList.toggle("active", el.dataset.pmf === activePmDueFilter));
+
+  populatePmSelect(true);
+  renderPmFormForActive();
+}
+
+function renderPmFormForActive() {
+  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
+  activePmCode = eq.code;
+  const st = evaluateMachineSchedule(eq);
+  const draft = getDraft(eq.code);
+
+  const lastDoneText = st.lastDoneDate
+    ? `${fmtShortDate(st.lastDoneDate)} (${esc(st.latestDone?.inspector || "-")})`
+    : "Henüz kayıt yok";
+  const nextDueText = st.nextDueDate ? fmtShortDate(st.nextDueDate) : "-";
+
+  document.getElementById("pmMachineHeader").innerHTML = `
+    <div>
+      <div style="font-weight:800;font-size:1.1rem">${esc(eq.code)} · ${esc(eq.name)}</div>
+      <div class="muted" style="margin-top:4px">
+        Periyot: <strong>${esc(eq.periodLabel)}</strong> · Son Bakım: <strong>${lastDoneText}</strong> · Sonraki Bakım: <strong>${nextDueText}</strong>
+      </div>
+      <div class="muted" style="margin-top:4px">Orijinal Excel: <strong>${esc(eq.originalExcelFile)}</strong></div>
+      ${st.latestWaiting ? `<div class="muted" style="margin-top:4px;color:#7C2D12"><strong>Bekleyen Malzeme:</strong> ${esc(st.latestWaiting.missingMaterial || "-")}</div>` : ""}
+    </div>
+    <span class="pm-status-pill ${st.pillClass}">${esc(st.label)}</span>
+  `;
+
+  document.getElementById("pmMissingMaterial").value = draft.missingMaterial || "";
+  document.getElementById("pmFindingsInput").value = draft.findings || "";
+  document.getElementById("pmInspectorInput").value = draft.inspector || clean(document.getElementById("currentActor")?.value || "");
+  document.getElementById("pmDateInput").value = draft.dateStr || toInputDateValue(Date.now());
+
+  if (!st.logs.length) {
+    document.getElementById("pmHistoryArea").innerHTML = `<div class="muted">Bu ekipman için henüz kayıtlı tarih geçmişi yok.</div>`;
+  } else {
+    document.getElementById("pmHistoryArea").innerHTML = st.logs.slice(0, 10).map(log => `
+      <div class="pm-history-item">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <strong>${esc(log.status || "Biten")}</strong>
+          <span class="muted">${esc(fmtShortDate(log.recordDate || log.savedAt))} · ${esc(log.inspector || "-")}</span>
+        </div>
+        ${log.missingMaterial ? `<div style="margin-top:3px;color:#7C2D12"><strong>Malzeme Notu:</strong> ${esc(log.missingMaterial)}</div>` : ""}
+        ${log.findings ? `<div style="margin-top:3px"><strong>Not:</strong> ${esc(log.findings)}</div>` : ""}
+      </div>
+    `).join("");
+  }
+}
+
+function savePmDraft() {
+  const draft = getDraft(activePmCode);
+  draft.missingMaterial = clean(document.getElementById("pmMissingMaterial").value);
+  draft.findings = clean(document.getElementById("pmFindingsInput").value);
+  draft.inspector = clean(document.getElementById("pmInspectorInput").value);
+  draft.dateStr = document.getElementById("pmDateInput").value || toInputDateValue(Date.now());
+  savePmDraftsLocal();
+}
+
+function savePmRecord(targetStatus) {
+  savePmDraft();
+  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
+  const draft = getDraft(eq.code);
+  const inspector = clean(draft.inspector || document.getElementById("currentActor").value);
+  if (!inspector) {
+    alert("Lütfen 'Kontrol Eden (Ad Soyad)' alanını doldurun.");
+    document.getElementById("pmInspectorInput").focus();
+    return;
+  }
+
+  const recordDate = parseInputDateToMs(draft.dateStr);
+  const entry = {
+    id: "PM-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase(),
+    equipmentCode: eq.code,
+    equipmentName: eq.name,
+    branch: "Elektrik",
+    periodLabel: eq.periodLabel,
+    status: targetStatus,
+    missingMaterial: clean(draft.missingMaterial),
+    findings: clean(draft.findings),
+    inspector,
+    recordDate,
+    savedAt: Date.now()
+  };
+
+  if (!pmLogs[eq.code] || Array.isArray(pmLogs[eq.code])) {
+    const arr = Array.isArray(pmLogs[eq.code]) ? pmLogs[eq.code] : [];
+    const obj = {};
+    arr.forEach(x => { if (x && x.id) obj[x.id] = x; });
+    pmLogs[eq.code] = obj;
+  }
+  pmLogs[eq.code][entry.id] = entry;
+  savePmLogsLocal();
+
+  if (pmLogsRef) {
+    pmLogsRef.child(eq.code).child(entry.id).set(entry).catch(() => {});
+  }
+
+  if (targetStatus === "Biten") {
+    delete pmDrafts[eq.code];
+    savePmDraftsLocal();
+  }
+
+  renderPmView();
+  alert(`${eq.code} (${fmtShortDate(recordDate)}) '${targetStatus}' olarak kaydedildi.`);
+}
+
+function copyCurrentPmQrLink() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("pm", activePmCode);
+  const link = url.toString();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(() => alert("QR linki kopyalandı:\n" + link)).catch(() => alert(link));
+  } else {
+    alert(link);
+  }
+}
+
+function downloadOriginalPmExcel() {
+  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
+  const fileName = eq.originalExcelFile;
+  if (!fileName) return;
+  const encodedUrl = encodeURI(fileName);
+  fetch(encodedUrl)
+    .then(res => {
+      if (!res.ok) throw new Error("Dosya bulunamadı");
+      return res.blob();
+    })
+    .then(blob => {
+      const a = document.createElement("a");
+      const objectUrl = URL.createObjectURL(blob);
+      a.href = objectUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+    })
+    .catch(() => {
+      const a = document.createElement("a");
+      a.href = encodedUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+}
+
+/* Arıza Takip & Pano */
+function getActor(fallback) {
+  const v = clean(document.getElementById("currentActor").value);
+  return v || fallback || "TEKNİSYEN";
+}
+function getKaliteActor() {
+  return clean(document.getElementById("kaliteActor").value) || "KALİTE";
+}
+
+function notifyTeam(title, message, topic = NTFY_TOPIC) {
+  try {
+    fetch(`${NTFY_SERVER}/${encodeURIComponent(topic)}`, {
+      method: "POST",
+      headers: { "Title": title, "Priority": "default" },
+      body: message
+    }).catch(() => {});
+  } catch (e) {}
+}
+function copyTopicValue(topic) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(topic).then(() => alert("Kanal adı kopyalandı: " + topic)).catch(() => alert(topic));
+  } else {
+    alert(topic);
+  }
+}
+function sendTestNotification() {
+  notifyTeam("Test Bildirimi", "Bakım ekibi bildirim kanalı aktif.");
+  alert("Test bildirimi gönderildi.");
+}
+function sendKaliteTestNotification() {
+  notifyTeam("Kalite Test Bildirimi", "Kalite birimi bildirim kanalı aktif.", KALITE_NTFY_TOPIC);
+  alert("Kalite test bildirimi gönderildi.");
+}
+
+function formatTicketNo(n) { return "ARZ-" + String(n || 1).padStart(4, "0"); }
+function nextTicketNo() { return tickets.reduce((m, t) => Math.max(m, Number(t.ticketNo) || 0), 0) + 1; }
+
+function triggerPhotoUpload(slot) { document.getElementById("photo" + slot).click(); }
+function removePhoto(e, slot) {
+  e.stopPropagation();
+  photos[slot - 1] = null;
+  document.getElementById("photo" + slot).value = "";
+  document.getElementById("p" + slot + "-img").src = "";
+  document.getElementById("p" + slot + "-img").classList.add("hidden");
+  document.getElementById("p" + slot + "-remove").classList.add("hidden");
+  document.getElementById("p" + slot + "-text").classList.remove("hidden");
+}
+function handlePhotoSelect(input, slot) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 900;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+      photos[slot - 1] = dataUrl;
+      document.getElementById("p" + slot + "-img").src = dataUrl;
+      document.getElementById("p" + slot + "-img").classList.remove("hidden");
+      document.getElementById("p" + slot + "-remove").classList.remove("hidden");
+      document.getElementById("p" + slot + "-text").classList.add("hidden");
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleFormSubmit(ev) {
+  ev.preventDefault();
+  const location = clean(document.getElementById("lokasyonInput").value);
+  const reporter = clean(document.getElementById("bildirenInput").value);
+  const description = clean(document.getElementById("aciklamaInput").value);
+  if (!location || reporter.length < 4 || !description) {
+    alert("Lütfen tüm zorunlu alanları doldurun.");
+    return;
+  }
+  const now = Date.now();
+  const id = "T-" + now + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+  const ticketNo = nextTicketNo();
+  const newTicket = {
+    id,
+    ticketNo,
+    location,
+    reporter,
+    description,
+    photos: photos.filter(Boolean),
+    status: "Bekliyor",
+    createdAt: now,
+    updatedAt: now,
+    history: [{ time: now, status: "Bekliyor", actor: reporter, note: "Yeni arıza bildirimi oluşturuldu" }]
+  };
+
+  tickets.unshift(newTicket);
+  saveLocal();
+  renderAll();
+
+  if (ticketsRef) {
+    ticketsRef.child(id).set(newTicket).catch(() => {});
+  }
+
+  notifyTeam(
+    `Yeni Arıza (${formatTicketNo(ticketNo)}) - ${location}`,
+    `Bildiren: ${reporter}\nAçıklama: ${description}`
+  );
+
+  document.getElementById("arizaForm").reset();
+  [1, 2].forEach(i => {
+    photos[i - 1] = null;
+    document.getElementById("p" + i + "-img").src = "";
+    document.getElementById("p" + i + "-img").classList.add("hidden");
+    document.getElementById("p" + i + "-remove").classList.add("hidden");
+    document.getElementById("p" + i + "-text").classList.remove("hidden");
+  });
+  alert(`Arıza kaydı açıldı: ${formatTicketNo(ticketNo)}`);
+}
+
+function updateTicket(id, newStatus) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  const noteEl = document.getElementById("note-" + id);
+  const note = clean(noteEl ? noteEl.value : "");
+  const actor = getActor(t.reporter);
+  const now = Date.now();
+
+  if (!Array.isArray(t.history)) t.history = [];
+  t.status = newStatus;
+  t.updatedAt = now;
+  t.lastActor = actor;
+  t.history.push({ time: now, status: newStatus, actor, note: note || `Durum '${newStatus}' olarak güncellendi` });
+  if (newStatus === "Tamamlandı" && !t.completedAt) {
+    t.completedAt = now;
+    t.cleaningStatus = "Bekliyor";
+  }
+
+  saveLocal();
+  renderAll();
+  if (ticketsRef) ticketsRef.child(id).set(t).catch(() => {});
+
+  notifyTeam(
+    `${formatTicketNo(t.ticketNo)} · ${newStatus}`,
+    `Lokasyon: ${t.location}\nTeknisyen: ${actor}${note ? "\nNot: " + note : ""}`,
+    KALITE_NTFY_TOPIC
+  );
+}
+
+function deleteTicket(id) {
+  if (!ustaUnlocked) { alert("Silmek için Bakımcı Girişi yapın."); return; }
+  if (!confirm("Bu arıza kaydını silmek istediğinize emin misiniz?")) return;
+  tickets = tickets.filter(x => x.id !== id);
+  saveLocal();
+  renderAll();
+  if (ticketsRef) ticketsRef.child(id).remove().catch(() => {});
+}
+
+function toggleUstaLock() {
+  ustaUnlocked = !ustaUnlocked;
+  document.getElementById("lockStatusText").textContent = ustaUnlocked ? "Bakımcı Açık" : "Bakımcı Girişi";
+  renderTickets();
+}
+
+function toggleKaliteLock() {
+  kaliteUnlocked = !kaliteUnlocked;
+  document.getElementById("kaliteLockStatusText").textContent = kaliteUnlocked ? "Kalite Açık" : "Kalite Girişi";
+  renderKalite();
+}
+
+function setCleaningResult(id, result) {
+  const t = tickets.find(x => x.id === id);
+  if (!t) return;
+  const noteEl = document.getElementById("knote-" + id);
+  const note = clean(noteEl ? noteEl.value : "");
+  const actor = getKaliteActor();
+  const now = Date.now();
+  t.cleaningStatus = result;
+  t.cleaningBy = actor;
+  t.cleaningAt = now;
+  t.cleaningNote = note;
+  if (!Array.isArray(t.history)) t.history = [];
+  t.history.push({ time: now, status: t.status, actor, note: `Kalite Temizlik Onayı: ${result}${note ? " (" + note + ")" : ""}` });
+  saveLocal();
+  renderAll();
+  if (ticketsRef) ticketsRef.child(id).set(t).catch(() => {});
+}
+
+function setStatusFilter(st) {
+  const cur = document.getElementById("statusFilter").value;
+  document.getElementById("statusFilter").value = cur === st ? "ALL" : st;
+  renderTickets();
+}
+
+function switchArchiveTab(arch) {
+  isArchiveView = arch;
+  document.getElementById("activeTab").classList.toggle("active", !arch);
+  document.getElementById("archiveTab").classList.toggle("active", arch);
+  renderTickets();
+}
+
+function updateCounts() {
+  const counts = { "Bekliyor": 0, "İşlemde": 0, "Parça Bekliyor": 0, "Servis Bekliyor": 0, "Tamamlandı": 0 };
+  tickets.forEach(t => { if (counts[t.status] !== undefined) counts[t.status]++; });
+  document.getElementById("countBekliyor").textContent = counts["Bekliyor"];
+  document.getElementById("countIslemde").textContent = counts["İşlemde"];
+  document.getElementById("countParca").textContent = counts["Parça Bekliyor"];
+  document.getElementById("countServis").textContent = counts["Servis Bekliyor"];
+  document.getElementById("countTamam").textContent = counts["Tamamlandı"];
+
+  const pendingKalite = tickets.filter(t => isDone(t) && t.cleaningStatus !== "OK" && t.cleaningStatus !== "NOK").length;
+  document.getElementById("kaliteBadgeCount").textContent = pendingKalite;
+}
+
+function renderTickets() {
+  updateCounts();
+  const stFilter = document.getElementById("statusFilter").value;
+  const q = clean(document.getElementById("ticketSearch").value).toLocaleLowerCase("tr-TR");
+  const grid = document.getElementById("counterGrid");
+  grid.classList.toggle("has-filter", stFilter !== "ALL");
+  grid.querySelectorAll(".counter").forEach(b => b.classList.toggle("active", b.dataset.st === stFilter));
+
+  const list = tickets.filter(t => {
+    const done = isDone(t);
+    if (stFilter !== "ALL") {
+      if (t.status !== stFilter) return false;
+    } else if (isArchiveView !== done) {
+      return false;
+    }
+    if (!q) return true;
+    const hay = `${formatTicketNo(t.ticketNo)} ${t.location || ""} ${t.reporter || ""} ${t.description || ""}`.toLocaleLowerCase("tr-TR");
+    return hay.includes(q);
+  });
+
+  const container = document.getElementById("ticketContainer");
+  if (!list.length) {
+    container.innerHTML = `<div class="empty">Gösterilecek arıza kaydı bulunmuyor.</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(t => {
+    const nexts = STATUS_TRANSITIONS[t.status] || [];
+    const hist = Array.isArray(t.history) ? t.history : [];
+    const photosHtml = Array.isArray(t.photos) && t.photos.length
+      ? `<div class="photos">${t.photos.map(p => `<img src="${p}" alt="Fotoğraf" onclick="openImage('${p}')">`).join("")}</div>`
+      : "";
+    const actionsHtml = nexts.length ? `
+      <div class="actions">
+        <input id="note-${esc(t.id)}" class="input" placeholder="İşlem / parça / servis notu (isteğe bağlı)">
+        <div class="row">
+          ${nexts.includes("İşlemde") ? `<button class="btn small st-islem" onclick="updateTicket('${esc(t.id)}','İşlemde')">İşleme Al</button>` : ""}
+          ${nexts.includes("Parça Bekliyor") ? `<button class="btn small st-parca" onclick="updateTicket('${esc(t.id)}','Parça Bekliyor')">Parça Bekliyor</button>` : ""}
+          ${nexts.includes("Servis Bekliyor") ? `<button class="btn small st-servis" onclick="updateTicket('${esc(t.id)}','Servis Bekliyor')">Servis Bekliyor</button>` : ""}
+          ${nexts.includes("Tamamlandı") ? `<button class="btn small st-tamam" onclick="updateTicket('${esc(t.id)}','Tamamlandı')">Tamamlandı</button>` : ""}
+          ${ustaUnlocked ? `<button class="btn small danger" onclick="deleteTicket('${esc(t.id)}')">Sil</button>` : ""}
+        </div>
+      </div>` : (ustaUnlocked ? `<div class="actions"><div class="row"><button class="btn small danger" onclick="deleteTicket('${esc(t.id)}')">Sil</button></div></div>` : "");
+
+    return `
+      <article class="ticket" data-status="${esc(t.status)}">
+        <div class="ticket-head">
+          <div class="ticket-id">
+            <div class="ticket-title">${esc(t.location)}</div>
+            <div class="ticket-no">${esc(formatTicketNo(t.ticketNo))}</div>
+          </div>
+          <div class="ticket-state">
+            <span class="badge">${esc(t.status)}</span>
+            <span class="age">${esc(ageText(t.createdAt))}</span>
+          </div>
+        </div>
+        <div class="ticket-info">${esc(t.description)}</div>
+        <div class="meta">
+          <span><strong>Bildiren:</strong> ${esc(t.reporter)}</span>
+          <span><strong>Açılış:</strong> ${esc(fmtDate(t.createdAt))}</span>
+          <span><strong>Güncelleme:</strong> ${esc(fmtDate(t.updatedAt))}</span>
+          ${t.cleaningStatus ? `<span><strong>Kalite:</strong> ${esc(t.cleaningStatus)}</span>` : ""}
+        </div>
+        ${photosHtml}
+        <details class="history"><summary>İşlem Geçmişi (${hist.length})</summary>${hist.map(h => `<div class="history-item"><strong>${esc(fmtDate(h.time))}</strong> · ${esc(h.status)} · ${esc(h.actor || "-")} — ${esc(h.note || "")}</div>`).join("")}</details>
+        ${actionsHtml}
+      </article>`;
+  }).join("");
+}
+
+function renderKalite() {
+  const list = tickets.filter(t => isDone(t));
+  const el = document.getElementById("kaliteContainer");
+  if (!list.length) {
+    el.innerHTML = `<div class="empty">Henüz tamamlanmış arıza kaydı bulunmuyor.</div>`;
+    return;
+  }
+  el.innerHTML = list.map(t => {
+    const cs = t.cleaningStatus || "Bekliyor";
+    return `
+      <article class="ticket" data-status="${esc(t.status)}">
+        <div class="ticket-head">
+          <div class="ticket-id"><div class="ticket-title">${esc(t.location)}</div><div class="ticket-no">${esc(formatTicketNo(t.ticketNo))}</div></div>
+          <span class="badge">${esc(cs)}</span>
+        </div>
+        <div class="ticket-info">${esc(t.description)}</div>
+        <div class="meta"><span><strong>Bildiren:</strong> ${esc(t.reporter)}</span><span><strong>Bitiş:</strong> ${esc(fmtDate(t.completedAt || t.updatedAt))}</span>${t.cleaningBy ? `<span><strong>Onaylayan:</strong> ${esc(t.cleaningBy)}</span>` : ""}</div>
+        <div class="actions">
+          <input id="knote-${esc(t.id)}" class="input" value="${esc(t.cleaningNote || "")}" placeholder="Temizlik / ortam kontrol notu">
+          <div class="row">
+            <button class="btn small success" onclick="setCleaningResult('${esc(t.id)}','OK')">OK (Temiz)</button>
+            <button class="btn small danger" onclick="setCleaningResult('${esc(t.id)}','NOK')">NOK (Eksik)</button>
+          </div>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+function populateMonthSelect() {
+  const sel = document.getElementById("aySecimi");
+  const cur = sel.value;
+  const set = new Set(tickets.map(t => monthKey(t.createdAt)).filter(Boolean));
+  const keys = Array.from(set).sort().reverse();
+  sel.innerHTML = `<option value="ALL">Tüm zamanlar</option>` + keys.map(k => `<option value="${k}">${esc(monthLabel(k))}</option>`).join("");
+  if (keys.includes(cur)) sel.value = cur;
+}
+
+function getFilteredReportTickets() {
+  const m = document.getElementById("aySecimi").value;
+  const st = document.getElementById("reportStatus").value;
+  const loc = clean(document.getElementById("reportLocation").value).toLocaleLowerCase("tr-TR");
+  const rep = clean(document.getElementById("reportReporter").value).toLocaleLowerCase("tr-TR");
+  const tech = clean(document.getElementById("reportTechnician").value).toLocaleLowerCase("tr-TR");
+
+  return tickets.filter(t => {
+    if (m !== "ALL" && monthKey(t.createdAt) !== m) return false;
+    if (st !== "ALL" && t.status !== st) return false;
+    if (loc && !String(t.location || "").toLocaleLowerCase("tr-TR").includes(loc)) return false;
+    if (rep && !String(t.reporter || "").toLocaleLowerCase("tr-TR").includes(rep)) return false;
+    if (tech) {
+      const hMatch = Array.isArray(t.history) && t.history.some(h => String(h.actor || "").toLocaleLowerCase("tr-TR").includes(tech));
+      const lMatch = String(t.lastActor || "").toLocaleLowerCase("tr-TR").includes(tech);
+      if (!hMatch && !lMatch) return false;
+    }
+    return true;
+  });
+}
+
+function updateRaporSummary() {
+  const list = getFilteredReportTickets();
+  const tamam = list.filter(t => t.status === "Tamamlandı").length;
+  const acik = list.length - tamam;
+  document.getElementById("raporOzet").innerHTML = `
+    <div class="stats">
+      <div class="stat"><span>Toplam Kayıt</span><strong>${list.length}</strong></div>
+      <div class="stat tamam"><span>Tamamlanan</span><strong>${tamam}</strong></div>
+      <div class="stat acik"><span>Açık / Bekleyen</span><strong>${acik}</strong></div>
+    </div>`;
+  document.getElementById("reportPreview").textContent = `${list.length} kayıt filtrelendi.`;
+}
+
+function exportToExcel() {
+  if (typeof XLSX === "undefined") { alert("Excel kütüphanesi yüklenemedi."); return; }
+  const list = getFilteredReportTickets();
+  const mainRows = list.map(t => ({
+    "Kayıt No": formatTicketNo(t.ticketNo),
+    "Lokasyon": t.location || "",
+    "Bildiren": t.reporter || "",
+    "Açıklama": t.description || "",
+    "Durum": t.status || "",
+    "Açılış": fmtDate(t.createdAt),
+    "Güncelleme": fmtDate(t.updatedAt),
+    "Kalite Temizlik Sonucu": t.cleaningStatus || "-"
+  }));
+  const histRows = [];
+  list.forEach(t => {
+    (Array.isArray(t.history) ? t.history : []).forEach(h => {
+      histRows.push({
+        "Kayıt No": formatTicketNo(t.ticketNo),
+        "Lokasyon": t.location || "",
+        "Tarih": fmtDate(h.time),
+        "Durum": h.status || "",
+        "Kişi": h.actor || "",
+        "Not": h.note || ""
+      });
+    });
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mainRows), "Arizalar");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(histRows), "Islem_Gecmisi");
+  XLSX.writeFile(wb, "Fabrika_Ariza_Raporu.xlsx");
+}
+
+function populateDatalists() {
+  const locs = Array.from(new Set(tickets.map(t => clean(t.location)).filter(Boolean)));
+  const reps = Array.from(new Set(tickets.map(t => clean(t.reporter)).filter(Boolean)));
+  const techs = new Set();
+  tickets.forEach(t => {
+    if (t.lastActor) techs.add(clean(t.lastActor));
+    (Array.isArray(t.history) ? t.history : []).forEach(h => { if (h.actor) techs.add(clean(h.actor)); });
+  });
+  document.getElementById("lokasyonHafiza").innerHTML = locs.map(x => `<option value="${esc(x)}">`).join("");
+  document.getElementById("bildirenHafiza").innerHTML = reps.map(x => `<option value="${esc(x)}">`).join("");
+  document.getElementById("ustaHafiza").innerHTML = Array.from(techs).map(x => `<option value="${esc(x)}">`).join("");
+}
+
+function testPanelSound() {
+  panelSoundEnabled = !panelSoundEnabled;
+  document.getElementById("panelSoundBtn").textContent = panelSoundEnabled ? "🔔 Sesli Uyarı Açık" : "🔕 Sesli Uyarı Kapalı";
+  if (panelSoundEnabled) {
+    try {
+      soundCtx = soundCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = soundCtx.createOscillator(), g = soundCtx.createGain();
+      o.connect(g); g.connect(soundCtx.destination);
+      o.frequency.value = 660; g.gain.value = 0.08;
+      o.start(); setTimeout(() => o.stop(), 180);
+    } catch (e) {}
+  }
+}
+
+function checkNewTicketsSound(arr) {
+  const activeIds = new Set(arr.filter(t => !isDone(t)).map(t => t.id));
+  if (isFirstLoad) { knownActiveIds = activeIds; isFirstLoad = false; return; }
+  let hasNew = false;
+  activeIds.forEach(id => { if (!knownActiveIds.has(id)) hasNew = true; });
+  knownActiveIds = activeIds;
+  if (hasNew && panelSoundEnabled) testPanelSound();
+}
+
+function renderAll() {
+  populateDatalists();
+  renderTickets();
+  renderKalite();
+  renderPmView();
+  if (!document.getElementById("rapor-section").classList.contains("hidden")) {
+    populateMonthSelect();
+    updateRaporSummary();
+  }
+}
+
+initFirebase();
+</script>
+</body>
+</html>
