@@ -811,16 +811,27 @@ function switchPmBranch(branch) {
   document.getElementById("pmMekanikView").classList.toggle("hidden", branch !== "MEKANIK");
 }
 
+function comparePmLogRecency(a, b) {
+  const dateDiff = Number(b?.recordDate || 0) - Number(a?.recordDate || 0);
+  if (dateDiff !== 0) return dateDiff;
+  return Number(b?.savedAt || 0) - Number(a?.savedAt || 0);
+}
+
 function getMachineLogs(code) {
   const raw = pmLogs && pmLogs[code] ? pmLogs[code] : {};
   const list = Array.isArray(raw) ? raw : Object.values(raw);
-  return list.filter(Boolean).sort((a, b) => (b.recordDate || b.savedAt || 0) - (a.recordDate || a.savedAt || 0));
+  return list.filter(Boolean).sort(comparePmLogRecency);
 }
 
 function evaluateMachineSchedule(eq) {
   const logs = getMachineLogs(eq.code);
-  const latestWaiting = logs.find(r => r.status === "Bekleyen (Malzeme Bekliyor)");
   const latestDone = logs.find(r => r.status === "Biten");
+  const latestWaitingRecord = logs.find(r => r.status === "Bekleyen (Malzeme Bekliyor)");
+  // A waiting entry is active only when it is newer than the latest completed maintenance.
+  const latestWaiting = latestWaitingRecord &&
+    (!latestDone || comparePmLogRecency(latestWaitingRecord, latestDone) < 0)
+      ? latestWaitingRecord
+      : null;
   const periodMs = (eq.periodDays || 30) * 86400000;
 
   if (!latestDone) {
