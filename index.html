@@ -43,7 +43,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-size:16px;line-height:1
 .group{margin-bottom:14px}
 .group label{display:block;font-size:.9rem;font-weight:650;color:var(--muted);margin-bottom:6px}
 .input,select,textarea{width:100%;padding:12px;border:1px solid #A9B3BA;border-radius:9px;background:var(--field);color:var(--ink);font-size:1rem}
-textarea{resize:vertical;min-height:84px}
+textarea{resize:vertical;min-height:92px}
 .input:focus,select:focus,textarea:focus{outline:3px solid #8FB2F0;border-color:#5C8FE6}
 .muted{font-size:.82rem;color:var(--muted)}
 .btn{border:0;border-radius:9px;padding:10px 14px;min-height:40px;font-size:.9rem;font-weight:650;cursor:pointer;background:#C7CED4;color:var(--ink)}
@@ -51,34 +51,10 @@ textarea{resize:vertical;min-height:84px}
 .btn:focus-visible,.navbtn:focus-visible,.counter:focus-visible{outline:3px solid #1F5FD0;outline-offset:2px}
 .primary{background:var(--bar);color:#fff}
 .success{background:var(--green);color:#fff}
-.warning{background:var(--amber);color:#2F2100}
 .danger{background:var(--red);color:#fff}
 .small{padding:7px 11px;min-height:34px;font-size:.82rem}
 .submit{width:100%;min-height:56px;border-radius:12px;font-size:1.05rem;font-weight:800;background:var(--amber);color:#2F2100}
 .pill-count{display:inline-block;background:var(--amber);color:#2F2100;border-radius:999px;padding:1px 7px;font-size:.78rem;font-weight:800;margin-left:4px}
-
-/* planlı bakım */
-.pm-subtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.pm-subtab{border:1px solid #A9B3BA;border-radius:9px;padding:9px 16px;font-size:.92rem;font-weight:750;cursor:pointer;background:var(--field);color:var(--ink)}
-.pm-subtab.active{background:var(--bar);border-color:var(--bar);color:#fff}
-.pm-summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.pm-stat{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left}
-.pm-stat span{display:block;font-size:.78rem;font-weight:700;color:var(--muted)}
-.pm-stat strong{font-size:1.45rem;font-weight:800}
-.pm-stat.active{outline:3px solid var(--bar);outline-offset:1px}
-.pm-header-box{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.pm-status-pill{border-radius:999px;padding:5px 12px;font-size:.8rem;font-weight:800;display:inline-block}
-.pm-pill-due{background:#F6D3D3;color:#7F1D1D}
-.pm-pill-soon{background:var(--amber-t);color:#6B4A00}
-.pm-pill-wait{background:var(--orange-t);color:#7C2D12}
-.pm-pill-ok{background:var(--green-t);color:#14532D}
-.pm-pill-none{background:#E2E8F0;color:#334155}
-.pm-block{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
-.pm-block-title{font-weight:800;font-size:1rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.pm-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.pm-wait-box{background:var(--orange-t);border:1px solid #E5A98B;border-radius:11px;padding:12px;margin-bottom:14px}
-.pm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.pm-history-item{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:8px;font-size:.88rem}
 
 /* durum rakamları */
 .counter-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
@@ -149,12 +125,10 @@ textarea{resize:vertical;min-height:84px}
   .card{padding:14px}
   .brand-logo{height:32px;max-width:125px}
   .header h1{font-size:1rem}
-  .nav{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .nav{width:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
   .nav .navbtn{min-width:0;min-height:44px;padding:8px 4px;font-size:.78rem;line-height:1.2;text-align:center}
   .counter-grid{grid-template-columns:repeat(3,1fr)}
   .counter strong{font-size:1.75rem}
-  .pm-summary-bar{grid-template-columns:repeat(2,1fr)}
-  .pm-actions{grid-template-columns:1fr}
 }
 @media(max-width:540px){
   .nav{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -173,7 +147,6 @@ textarea{resize:vertical;min-height:84px}
     <div class="nav">
       <button class="navbtn active" data-sec="form-section" onclick="showSection('form-section')">＋ Arıza Bildir</button>
       <button class="navbtn" data-sec="pano-section" onclick="showSection('pano-section')">▤ Bakım Panosu</button>
-      <button class="navbtn" data-sec="pm-section" onclick="showSection('pm-section')">☑ Planlı Bakım</button>
       <button class="navbtn" data-sec="kalite-section" onclick="showSection('kalite-section')">✓ Kalite <span id="kaliteBadgeCount" class="pill-count">0</span></button>
       <button class="navbtn" data-sec="rapor-section" onclick="handleReportNav()">▥ Rapor & Excel</button>
       <button class="navbtn" onclick="openSettings()">⚙ Bağlantı</button>
@@ -199,75 +172,6 @@ textarea{resize:vertical;min-height:84px}
     <div class="tabbar"><button id="activeTab" class="btn tab active" onclick="switchArchiveTab(false)">Aktif Arızalar</button><button id="archiveTab" class="btn tab" onclick="switchArchiveTab(true)">Tamamlananlar</button></div>
     <div class="searchrow"><input id="ticketSearch" class="input" placeholder="Kayıt no, makine veya bildiren ara" oninput="renderTickets()"><input type="hidden" id="statusFilter" value="ALL"></div>
     <div id="ticketContainer"></div>
-  </section>
-
-  <section id="pm-section" class="card hidden">
-    <div class="card-title">
-      <span>Planlı Bakım · Tarih ve Excel Takibi</span>
-      <div class="row">
-        <button class="btn small" onclick="copyCurrentPmQrLink()">🔗 QR Linkini Kopyala</button>
-        <button class="btn small primary" onclick="downloadOriginalPmExcel()">📥 Orijinal Excel'i İndir</button>
-      </div>
-    </div>
-
-    <div class="pm-subtabs">
-      <button id="pmTabElektrik" type="button" class="pm-subtab active" onclick="switchPmBranch('ELEKTRIK')">⚡ Elektrik (16)</button>
-      <button id="pmTabMekanik" type="button" class="pm-subtab" onclick="switchPmBranch('MEKANIK')">🔧 Mekanik</button>
-    </div>
-
-    <div id="pmElektrikView">
-      <div class="pm-summary-bar" id="pmSummaryBar">
-        <button type="button" class="pm-stat active" data-pmf="ALL" onclick="setPmDueFilter('ALL')"><span>Tüm Elektrik (16)</span><strong id="pmCountAll">16</strong></button>
-        <button type="button" class="pm-stat" data-pmf="DUE_SOON" onclick="setPmDueFilter('DUE_SOON')"><span>Yaklaşan (≤5 Gün)</span><strong id="pmCountSoon">0</strong></button>
-        <button type="button" class="pm-stat" data-pmf="OVERDUE" onclick="setPmDueFilter('OVERDUE')"><span>Gecikmiş</span><strong id="pmCountOverdue">0</strong></button>
-        <button type="button" class="pm-stat" data-pmf="WAITING" onclick="setPmDueFilter('WAITING')"><span>Malzeme Bekleyen</span><strong id="pmCountWaiting">0</strong></button>
-      </div>
-
-      <div class="group">
-        <label for="pmMachineSelect">Ekipman / Pano Seçimi (?pm=MAKINE_KODU)</label>
-        <select id="pmMachineSelect" onchange="onPmMachineChange(this.value)"></select>
-      </div>
-
-      <div id="pmMachineHeader" class="pm-header-box"></div>
-
-      <div id="pmMaterialWaitBox" class="pm-wait-box">
-        <div class="group" style="margin-bottom:0">
-          <label for="pmMissingMaterial">Eksik Malzeme / Sipariş Notu (Malzeme Bekliyorsa)</label>
-          <input id="pmMissingMaterial" class="input" placeholder="Örn: Şalter / sensör / kondansatör sipariş bekliyor" oninput="savePmDraft()">
-        </div>
-      </div>
-
-      <div class="pm-block">
-        <div class="pm-block-title"><span>Bakım Kaydı ve Tarih Güncelleme</span></div>
-        <div class="pm-grid-2">
-          <div class="group" style="margin-bottom:0">
-            <label for="pmInspectorInput">Kontrol Eden (Ad Soyad)</label>
-            <input id="pmInspectorInput" class="input" list="ustaHafiza" placeholder="Ad Soyad" oninput="formatUpper(this);savePmDraft()">
-          </div>
-          <div class="group" style="margin-bottom:0">
-            <label for="pmDateInput">Bakım Tarihi</label>
-            <input id="pmDateInput" type="date" class="input" onchange="savePmDraft()">
-          </div>
-        </div>
-        <div class="group" style="margin-top:12px;margin-bottom:0">
-          <label for="pmFindingsInput">Kısa Not / Bulgu</label>
-          <textarea id="pmFindingsInput" placeholder="İsteğe bağlı kısa not…" oninput="savePmDraft()"></textarea>
-        </div>
-        <div class="pm-actions">
-          <button type="button" class="btn warning" onclick="savePmRecord('Bekleyen (Malzeme Bekliyor)')">⏳ Beklemeye Al (Malzeme Bekliyor)</button>
-          <button type="button" class="btn success" onclick="savePmRecord('Biten')">✓ Tamamla</button>
-        </div>
-      </div>
-
-      <div class="pm-block">
-        <div class="pm-block-title"><span>Bakım Tarih Geçmişi</span></div>
-        <div id="pmHistoryArea"></div>
-      </div>
-    </div>
-
-    <div id="pmMekanikView" class="hidden">
-      <div class="empty">Mekanik planlı bakım kontrol listeleri henüz eklenmedi. İçerik yok.</div>
-    </div>
   </section>
 
   <section id="kalite-section" class="card hidden">
@@ -313,936 +217,681 @@ const FIREBASE_CONFIG = {
   appId: "1:1054966260513:web:10aaae99657642546c1460"
 };
 
-const PM_EQUIPMENT = [
-  { code: "PANO-GENEL", name: "Ana Pano, Dağıtım Panoları, Tali Panolar ve Aydınlatma Panoları", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Ana_Pano_Dagitim_Tali_ve_Aydinlatma_Panolari_Aylik_Bakim_Kontrol_Formu.xlsx" },
-  { code: "ITW-DOLUM", name: "ITW Dikey Dolum Makinesi", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "ITW_Dikey_Dolum_Makinesi_Aylik_Bakim_Kontrol_Formu-v4.xlsx" },
-  { code: "ITW-VAKUM", name: "ITW Vakum Dedektörü / Makinesi", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "ITW_Vakum_Dedektoru_Aylik_Bakim_Kontrol_Formu-v2.xlsx" },
-  { code: "JENERATOR", name: "Jeneratör 1 ve Jeneratör 2", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Jeneratör_kontrol_form_güncel.xlsx" },
-  { code: "KAZAN-DAIRESI", name: "Kazan Dairesi", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Kazan_Dairesi_Aylik_Bakim_Kontrol_Formu_.xlsx" },
-  { code: "KOMPANZASYON", name: "Kompanzasyon Panosu", periodLabel: "3 Aylık", periodDays: 90, originalExcelFile: "Kompanzasyon_Panosu_3_Aylik_Bakim_Kontrol_Formu-Yatay-v3.xlsx" },
-  { code: "KOMPRESOR", name: "Kompresör (Atlas Copco GA30 / GA45 VSD)", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Kompresor_Aylik_Bakim_Kontrol_Listesi.xlsx" },
-  { code: "LANGGUTH", name: "Langguth Etiketleme Makinesi", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Langguth_Etiketleme_Makinesi_Aylik_Bakim_Kontrol_Formu.xlsx" },
-  { code: "MARMAK-VAKUM", name: "Marmak Vakum Dedektörü / Makinesi", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Marmak_Vakum_Dedektoru_Aylik_Bakim_Kontrol_Formu-v2.xlsx" },
-  { code: "MAURER-NORDSON", name: "Maurer Koli Makinesi & Nordson Tutkal Sistemi", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Maurer_Koli_Makinesi_Nordson_Aylik_Bakim_Kontrol_Formu-v2.xlsx" },
-  { code: "MICHANOX", name: "Michanox Tünel Pastörizatör", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Michanox_Tunel_Pastorizator_Aylik_Bakim_Kontrol_Formu-v4.xlsx" },
-  { code: "SALAMURA-ODASI", name: "Salamura Hazırlama Odası ve Panosu", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Salamura_Hazirlama_Odasi_ve_Panosu_Aylik_Bakim_Kontrol_Formu-v4.xlsx" },
-  { code: "SOGUTMA-ODALARI", name: "Soğutma Odaları (1, 2, 3 ve 4)", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Sogutma_Odalari_1_2_3_4_Aylik_Bakim_Kontrol_Formu-v5.xlsx" },
-  { code: "OTOKLAV", name: "Steriflow ve Stock Otoklav", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Steriflow_ve_Stock_Otoklav_Aylik_Bakim_Kontrol_Formu-Tek_Liste.xlsx" },
-  { code: "TUZ-HAVUZU", name: "Tuz Havuzu ve Tuzlu Su Hazırlama Tankları", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "Tuz_Havuzu_ve_Tuzlu_Su_Hazirlama_Tanklari_Aylik_Bakim_Kontrol_Formu-v5.xlsx" },
-  { code: "X-RAY", name: "X-RAY Kontrol Sistemi", periodLabel: "Aylık", periodDays: 30, originalExcelFile: "X-RAY_Aylik_Bakim_Kontrol_Listesi.xlsx" }
-];
+let firebaseApp = null;
+let firebaseDb = null;
+let firebaseReady = false;
+let firebaseAuthReady = false;
+let databaseReadReady = false;
+let databaseWriteReady = false;
+let healthCheckInFlight = false;
+let healthCheckTimer = null;
+let lastHealthCheckAt = 0;
+const HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000;
+let realtimeListenersStarted = false;
+let realtimeLoading = false;
+let realtimeStartPromise = null;
+let realtimePending = new Map();
+let realtimePendingRemoved = new Set();
+let startupKnownIds = new Set();
+let arizaKayitlari=[];
+let hafizaLokasyonlar=[];
+let hafizaBildirenler=[];
+let hafizaUstalar=[];
+let tempPhotos=[null,null];
+const USTA_LOGIN_STORAGE_KEY='arizaBakimOturumu';
+const KALITE_LOGIN_STORAGE_KEY='arizaKaliteOturumu';
+function readRememberedLogin(key){try{return localStorage.getItem(key)==='1';}catch(e){return false;}}
+function rememberLogin(key,enabled){try{if(enabled)localStorage.setItem(key,'1');else localStorage.removeItem(key);}catch(e){console.warn('Oturum bu tarayıcıda hatırlanamadı.',e);}}
+let ustaLoggedIn=readRememberedLogin(USTA_LOGIN_STORAGE_KEY);
+let kaliteLoggedIn=readRememberedLogin(KALITE_LOGIN_STORAGE_KEY);
+let raporUnlocked=ustaLoggedIn;
+let archiveMode=false;
+let syncBusy=false;
+let lastSyncAt=null;
+let lastSyncError='';
+let initialSyncComplete=false;
+let panelSoundEnabled=true;
+let panelAudioContext=null;
+let pendingPanelSound=false;
+const USTA_SIFRESI='4535';
+const KALITE_SIFRESI='4545';
+const NTFY_TOPIC='burakcan-bakim';
+const KALITE_NTFY_TOPIC='burakcan-kalite';
+let ntfyTopic=NTFY_TOPIC;
+let kaliteNtfyTopic=KALITE_NTFY_TOPIC;
+const $=id=>document.getElementById(id);
 
-const PM_BY_CODE = Object.fromEntries(PM_EQUIPMENT.map(eq => [eq.code, eq]));
+function firebaseConfigIsReady(){
+  const values=['apiKey','authDomain','databaseURL','projectId','appId'];
+  return values.every(k=>typeof FIREBASE_CONFIG[k]==='string' && FIREBASE_CONFIG[k].trim() && !FIREBASE_CONFIG[k].includes('_BURAYA'));
+}
+async function initializeFirebase(){
+  if(!firebaseConfigIsReady()) throw new Error('Firebase proje bilgileri eksik.');
+  if(!window.firebase) throw new Error('Firebase kütüphanesi yüklenemedi. İnternet bağlantısını kontrol edin.');
+  firebaseApp=firebase.apps.length?firebase.app():firebase.initializeApp(FIREBASE_CONFIG);
+  firebaseDb=firebase.database();
+  const auth=firebase.auth();
+  await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  if(!auth.currentUser) await auth.signInAnonymously();
+  if(!auth.currentUser) throw new Error('Firebase anonim oturumu açılamadı.');
+  firebaseAuthReady=true;
 
-const MAX_PHOTOS = 2;
-const STORAGE_KEY = "fabrika_ariza_takip_v1";
-const PM_LOGS_KEY = "fabrika_pm_logs_v1";
-const PM_DRAFT_KEY = "fabrika_pm_draft_v1";
-const NTFY_SERVER = "https://ntfy.sh";
-const NTFY_TOPIC = "burakcan-bakim";
-const KALITE_NTFY_TOPIC = "burakcan-kalite";
-const STATUS_TRANSITIONS = {
-  "Bekliyor": ["İşlemde", "Parça Bekliyor", "Servis Bekliyor", "Tamamlandı"],
-  "İşlemde": ["Parça Bekliyor", "Servis Bekliyor", "Tamamlandı"],
-  "Parça Bekliyor": ["İşlemde", "Servis Bekliyor", "Tamamlandı"],
-  "Servis Bekliyor": ["İşlemde", "Parça Bekliyor", "Tamamlandı"],
-  "Tamamlandı": []
-};
+  let previousConnection=false;
+  firebaseDb.ref('.info/connected').on('value',snap=>{
+    const connected=snap.val()===true;
+    firebaseReady=connected;
+    if(!connected){databaseReadReady=false;databaseWriteReady=false;}
+    statusText();
+    if(connected&&!previousConnection)void runFirebaseHealthCheck();
+    previousConnection=connected;
+  },err=>{
+    firebaseReady=false;databaseReadReady=false;databaseWriteReady=false;
+    lastSyncError=(err.code?err.code+' — ':'')+(err.message||String(err));
+    statusText();
+  });
 
-let db = null, ticketsRef = null, pmLogsRef = null, dbReady = false;
-let tickets = [], pmLogs = {}, photos = [null, null];
-let isArchiveView = false, ustaUnlocked = false, kaliteUnlocked = false;
-let panelSoundEnabled = false, soundCtx = null, knownActiveIds = null, isFirstLoad = true;
-let activePmBranch = "ELEKTRIK";
-let activePmCode = PM_EQUIPMENT[0].code;
-let activePmDueFilter = "ALL";
-let pmDrafts = {};
-
-const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
-const clean = s => String(s ?? "").trim();
-const formatUpper = el => { const p = el.selectionStart; el.value = el.value.toLocaleUpperCase("tr-TR"); el.setSelectionRange(p, p); };
-const pad2 = n => String(n).padStart(2, "0");
-
-function fmtDate(ms) {
-  if (!ms) return "-";
-  const d = new Date(Number(ms));
-  if (isNaN(d.getTime())) return "-";
-  return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-}
-function fmtShortDate(ms) {
-  if (!ms) return "-";
-  const d = new Date(Number(ms));
-  if (isNaN(d.getTime())) return "-";
-  return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`;
-}
-function toInputDateValue(ms) {
-  const d = ms ? new Date(Number(ms)) : new Date();
-  if (isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-}
-function parseInputDateToMs(dateStr) {
-  if (!dateStr) return Date.now();
-  const parts = dateStr.split("-").map(Number);
-  if (parts.length !== 3 || parts.some(isNaN)) return Date.now();
-  const now = new Date();
-  return new Date(parts[0], parts[1] - 1, parts[2], now.getHours(), now.getMinutes(), now.getSeconds()).getTime();
-}
-function monthKey(ms) {
-  const d = new Date(Number(ms));
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
-}
-function monthLabel(key) {
-  const [y, m] = key.split("-");
-  const names = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-  return `${names[Number(m) - 1] || m} ${y}`;
-}
-function durationText(ms) {
-  const m = Math.max(1, Math.round(ms / 60000));
-  if (m < 60) return `${m} dk`;
-  const h = Math.floor(m / 60), rem = m % 60;
-  return h < 24 ? (rem ? `${h} sa ${rem} dk` : `${h} sa`) : `${Math.floor(h / 24)} gün ${h % 24} sa`;
-}
-function ageText(ms) { return durationText(Date.now() - ms) + " önce"; }
-function isDone(t) { return t.status === "Tamamlandı"; }
-
-function showSection(id) {
-  ["form-section", "pano-section", "pm-section", "kalite-section", "rapor-section"].forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id));
-  document.querySelectorAll(".navbtn[data-sec]").forEach(b => b.classList.toggle("active", b.dataset.sec === id));
-  if (id === "pm-section") renderPmView();
+  if(!healthCheckTimer)healthCheckTimer=setInterval(()=>{void runFirebaseHealthCheck();},HEALTH_CHECK_INTERVAL_MS);
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&Date.now()-lastHealthCheckAt>60000)void runFirebaseHealthCheck();
+  });
 }
 
-function handleReportNav() {
-  showSection("rapor-section");
-  populateMonthSelect();
-  updateRaporSummary();
-}
-
-function openSettings() { document.getElementById("settingsModal").classList.remove("hidden"); }
-function closeSettings() { document.getElementById("settingsModal").classList.add("hidden"); }
-function openImage(src) { document.getElementById("modalImg").src = src; document.getElementById("imageModal").classList.remove("hidden"); }
-function closeModal() { document.getElementById("imageModal").classList.add("hidden"); }
-
-function setStatus(type, text) {
-  const el = document.getElementById("connectionStatus");
-  el.className = "statusline " + type;
-  el.textContent = text;
-}
-
-function loadLocal() {
-  try { tickets = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch (e) { tickets = []; }
-  if (!Array.isArray(tickets)) tickets = [];
-  try { pmLogs = JSON.parse(localStorage.getItem(PM_LOGS_KEY) || "{}"); } catch (e) { pmLogs = {}; }
-  if (!pmLogs || typeof pmLogs !== "object") pmLogs = {};
-  try { pmDrafts = JSON.parse(localStorage.getItem(PM_DRAFT_KEY) || "{}"); } catch (e) { pmDrafts = {}; }
-  if (!pmDrafts || typeof pmDrafts !== "object") pmDrafts = {};
-}
-function saveLocal() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets)); } catch (e) {}
-}
-function savePmLogsLocal() {
-  try { localStorage.setItem(PM_LOGS_KEY, JSON.stringify(pmLogs)); } catch (e) {}
-}
-function savePmDraftsLocal() {
-  try { localStorage.setItem(PM_DRAFT_KEY, JSON.stringify(pmDrafts)); } catch (e) {}
-}
-
-function initFirebase() {
-  loadLocal();
-  readPmQueryParam();
-  renderAll();
-  if (typeof firebase === "undefined") {
-    setStatus("err", "Firebase SDK yüklenemedi. Yerel kayıt modu aktif.");
-    return;
+async function runFirebaseHealthCheck(){
+  if(healthCheckInFlight)return false;
+  if(!firebaseDb||!firebaseAuthReady||!firebase.auth().currentUser||!firebaseReady){
+    databaseReadReady=false;databaseWriteReady=false;statusText();return false;
   }
-  try {
-    const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
-    db = app.database();
-    ticketsRef = db.ref("tickets");
-    pmLogsRef = db.ref("pmLogs");
-    db.ref(".info/connected").on("value", s => {
-      const ok = !!s.val();
-      dbReady = ok;
-      setStatus(ok ? "ok" : "warn", ok ? "Firebase Realtime Database bağlı · Canlı senkronizasyon aktif" : "Yerel önbellek aktif · Bağlantı bekleniyor…");
-    });
-    firebase.auth().signInAnonymously().catch(() => {});
-    ticketsRef.on("value", snap => {
-      const val = snap.val();
-      tickets = val ? Object.keys(val).map(k => ({ ...val[k], id: val[k].id || k })) : [];
-      tickets.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      saveLocal();
-      checkNewTicketsSound(tickets);
-      renderAll();
-    }, err => {
-      setStatus("warn", "Okuma izni/bağlantı uyarısı: " + err.message);
-    });
-    pmLogsRef.on("value", snap => {
-      const val = snap.val();
-      if (val && typeof val === "object") {
-        pmLogs = val;
-        savePmLogsLocal();
-        renderPmView();
-      }
-    }, () => {});
-  } catch (e) {
-    setStatus("err", "Firebase başlatılamadı: " + e.message);
-  }
-}
-
-function syncAll(manual) {
-  if (manual) setStatus(dbReady ? "ok" : "warn", dbReady ? "Canlı veriler güncellendi" : "Yerel veriler yenilendi");
-  renderAll();
-}
-
-/* Planlı Bakım — Sadece Tarih ve Excel Takibi */
-function readPmQueryParam() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const code = clean(params.get("pm") || "").toUpperCase();
-    if (code && PM_BY_CODE[code]) {
-      activePmCode = code;
-      activePmBranch = "ELEKTRIK";
-      showSection("pm-section");
-    }
-  } catch (e) {}
-}
-
-function switchPmBranch(branch) {
-  activePmBranch = branch;
-  document.getElementById("pmTabElektrik").classList.toggle("active", branch === "ELEKTRIK");
-  document.getElementById("pmTabMekanik").classList.toggle("active", branch === "MEKANIK");
-  document.getElementById("pmElektrikView").classList.toggle("hidden", branch !== "ELEKTRIK");
-  document.getElementById("pmMekanikView").classList.toggle("hidden", branch !== "MEKANIK");
-}
-
-function getMachineLogs(code) {
-  const raw = pmLogs && pmLogs[code] ? pmLogs[code] : {};
-  const list = Array.isArray(raw) ? raw : Object.values(raw);
-  return list.filter(Boolean).sort((a, b) => (b.recordDate || b.savedAt || 0) - (a.recordDate || a.savedAt || 0));
-}
-
-function evaluateMachineSchedule(eq) {
-  const logs = getMachineLogs(eq.code);
-  const latestWaiting = logs.find(r => r.status === "Bekleyen (Malzeme Bekliyor)");
-  const latestDone = logs.find(r => r.status === "Biten");
-  const periodMs = (eq.periodDays || 30) * 86400000;
-
-  if (!latestDone) {
-    return {
-      key: "NONE",
-      label: latestWaiting ? "Malzeme Bekliyor" : "Kayıt Yok",
-      pillClass: latestWaiting ? "pm-pill-wait" : "pm-pill-none",
-      lastDoneDate: null,
-      nextDueDate: null,
-      daysLeft: null,
-      latestWaiting,
-      latestDone: null,
-      logs
-    };
-  }
-
-  const lastDoneMs = Number(latestDone.recordDate || latestDone.savedAt);
-  const nextDueMs = lastDoneMs + periodMs;
-  const daysLeft = Math.ceil((nextDueMs - Date.now()) / 86400000);
-
-  if (latestWaiting) {
-    return {
-      key: "WAITING",
-      label: `Malzeme Bekliyor · Sonraki: ${fmtShortDate(nextDueMs)}`,
-      pillClass: "pm-pill-wait",
-      lastDoneDate: lastDoneMs,
-      nextDueDate: nextDueMs,
-      daysLeft,
-      latestWaiting,
-      latestDone,
-      logs
-    };
-  }
-
-  if (daysLeft < 0) {
-    return {
-      key: "OVERDUE",
-      label: `Gecikmiş (${Math.abs(daysLeft)} gün geçti)`,
-      pillClass: "pm-pill-due",
-      lastDoneDate: lastDoneMs,
-      nextDueDate: nextDueMs,
-      daysLeft,
-      latestWaiting: null,
-      latestDone,
-      logs
-    };
-  }
-
-  if (daysLeft <= 5) {
-    return {
-      key: "DUE_SOON",
-      label: `Yaklaşan (${daysLeft === 0 ? "Bugün" : daysLeft + " gün kaldı"})`,
-      pillClass: "pm-pill-soon",
-      lastDoneDate: lastDoneMs,
-      nextDueDate: nextDueMs,
-      daysLeft,
-      latestWaiting: null,
-      latestDone,
-      logs
-    };
-  }
-
-  return {
-    key: "OK",
-    label: `Normal (${daysLeft} gün kaldı)`,
-    pillClass: "pm-pill-ok",
-    lastDoneDate: lastDoneMs,
-    nextDueDate: nextDueMs,
-    daysLeft,
-    latestWaiting: null,
-    latestDone,
-    logs
-  };
-}
-
-function setPmDueFilter(filterKey) {
-  activePmDueFilter = activePmDueFilter === filterKey && filterKey !== "ALL" ? "ALL" : filterKey;
-  document.querySelectorAll(".pm-stat").forEach(el => el.classList.toggle("active", el.dataset.pmf === activePmDueFilter));
-  populatePmSelect(false);
-}
-
-function populatePmSelect(keepCurrent) {
-  const sel = document.getElementById("pmMachineSelect");
-  const filtered = PM_EQUIPMENT.filter(eq => {
-    const st = evaluateMachineSchedule(eq);
-    if (activePmDueFilter === "DUE_SOON") return st.key === "DUE_SOON";
-    if (activePmDueFilter === "OVERDUE") return st.key === "OVERDUE";
-    if (activePmDueFilter === "WAITING") return st.key === "WAITING";
+  healthCheckInFlight=true;
+  try{
+    const uid=firebase.auth().currentUser.uid;
+    const probeRef=firebaseDb.ref('system/healthChecks/'+uid);
+    const token=Date.now()+'-'+Math.random().toString(36).slice(2,10);
+    await probeRef.set({token,checkedAt:firebase.database.ServerValue.TIMESTAMP,projectId:FIREBASE_CONFIG.projectId});
+    const snapshot=await probeRef.once('value');
+    const saved=snapshot.val();
+    if(!snapshot.exists()||!saved||saved.token!==token)throw new Error('Kontrol kaydı Firebase’den geri okunamadı.');
+    databaseReadReady=true;databaseWriteReady=true;lastHealthCheckAt=Date.now();lastSyncError='';statusText();
     return true;
-  });
-
-  const list = filtered.length ? filtered : PM_EQUIPMENT;
-  if (!keepCurrent || !list.some(x => x.code === activePmCode)) {
-    activePmCode = list[0].code;
-  }
-
-  sel.innerHTML = list.map(eq => {
-    const st = evaluateMachineSchedule(eq);
-    return `<option value="${esc(eq.code)}" ${eq.code === activePmCode ? "selected" : ""}>${esc(eq.code)} — ${esc(eq.name)} [${esc(st.label)}]</option>`;
-  }).join("");
+  }catch(error){
+    databaseReadReady=false;databaseWriteReady=false;
+    lastSyncError=(error?.code?error.code+' — ':'')+(error?.message||String(error));
+    console.warn('Firebase otomatik bağlantı testi başarısız:',lastSyncError);
+    statusText();return false;
+  }finally{healthCheckInFlight=false;}
 }
-
-function getDraft(code) {
-  if (!pmDrafts[code] || typeof pmDrafts[code] !== "object") {
-    pmDrafts[code] = {
-      missingMaterial: "",
-      findings: "",
-      inspector: "",
-      dateStr: toInputDateValue(Date.now())
-    };
-  }
-  return pmDrafts[code];
-}
-
-function onPmMachineChange(code) {
-  if (!PM_BY_CODE[code]) return;
-  activePmCode = code;
-  renderPmFormForActive();
-}
-
-function renderPmView() {
-  let soonCount = 0, overdueCount = 0, waitingCount = 0;
-  PM_EQUIPMENT.forEach(eq => {
-    const st = evaluateMachineSchedule(eq);
-    if (st.key === "DUE_SOON") soonCount++;
-    if (st.key === "OVERDUE") overdueCount++;
-    if (st.key === "WAITING") waitingCount++;
-  });
-  document.getElementById("pmCountAll").textContent = PM_EQUIPMENT.length;
-  document.getElementById("pmCountSoon").textContent = soonCount;
-  document.getElementById("pmCountOverdue").textContent = overdueCount;
-  document.getElementById("pmCountWaiting").textContent = waitingCount;
-  document.querySelectorAll(".pm-stat").forEach(el => el.classList.toggle("active", el.dataset.pmf === activePmDueFilter));
-
-  populatePmSelect(true);
-  renderPmFormForActive();
-}
-
-function renderPmFormForActive() {
-  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
-  activePmCode = eq.code;
-  const st = evaluateMachineSchedule(eq);
-  const draft = getDraft(eq.code);
-
-  const lastDoneText = st.lastDoneDate
-    ? `${fmtShortDate(st.lastDoneDate)} (${esc(st.latestDone?.inspector || "-")})`
-    : "Henüz kayıt yok";
-  const nextDueText = st.nextDueDate ? fmtShortDate(st.nextDueDate) : "-";
-
-  document.getElementById("pmMachineHeader").innerHTML = `
-    <div>
-      <div style="font-weight:800;font-size:1.1rem">${esc(eq.code)} · ${esc(eq.name)}</div>
-      <div class="muted" style="margin-top:4px">
-        Periyot: <strong>${esc(eq.periodLabel)}</strong> · Son Bakım: <strong>${lastDoneText}</strong> · Sonraki Bakım: <strong>${nextDueText}</strong>
-      </div>
-      <div class="muted" style="margin-top:4px">Orijinal Excel: <strong>${esc(eq.originalExcelFile)}</strong></div>
-      ${st.latestWaiting ? `<div class="muted" style="margin-top:4px;color:#7C2D12"><strong>Bekleyen Malzeme:</strong> ${esc(st.latestWaiting.missingMaterial || "-")}</div>` : ""}
-    </div>
-    <span class="pm-status-pill ${st.pillClass}">${esc(st.label)}</span>
-  `;
-
-  document.getElementById("pmMissingMaterial").value = draft.missingMaterial || "";
-  document.getElementById("pmFindingsInput").value = draft.findings || "";
-  document.getElementById("pmInspectorInput").value = draft.inspector || clean(document.getElementById("currentActor")?.value || "");
-  document.getElementById("pmDateInput").value = draft.dateStr || toInputDateValue(Date.now());
-
-  if (!st.logs.length) {
-    document.getElementById("pmHistoryArea").innerHTML = `<div class="muted">Bu ekipman için henüz kayıtlı tarih geçmişi yok.</div>`;
-  } else {
-    document.getElementById("pmHistoryArea").innerHTML = st.logs.slice(0, 10).map(log => `
-      <div class="pm-history-item">
-        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-          <strong>${esc(log.status || "Biten")}</strong>
-          <span class="muted">${esc(fmtShortDate(log.recordDate || log.savedAt))} · ${esc(log.inspector || "-")}</span>
-        </div>
-        ${log.missingMaterial ? `<div style="margin-top:3px;color:#7C2D12"><strong>Malzeme Notu:</strong> ${esc(log.missingMaterial)}</div>` : ""}
-        ${log.findings ? `<div style="margin-top:3px"><strong>Not:</strong> ${esc(log.findings)}</div>` : ""}
-      </div>
-    `).join("");
-  }
-}
-
-function savePmDraft() {
-  const draft = getDraft(activePmCode);
-  draft.missingMaterial = clean(document.getElementById("pmMissingMaterial").value);
-  draft.findings = clean(document.getElementById("pmFindingsInput").value);
-  draft.inspector = clean(document.getElementById("pmInspectorInput").value);
-  draft.dateStr = document.getElementById("pmDateInput").value || toInputDateValue(Date.now());
-  savePmDraftsLocal();
-}
-
-function savePmRecord(targetStatus) {
-  savePmDraft();
-  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
-  const draft = getDraft(eq.code);
-  const inspector = clean(draft.inspector || document.getElementById("currentActor").value);
-  if (!inspector) {
-    alert("Lütfen 'Kontrol Eden (Ad Soyad)' alanını doldurun.");
-    document.getElementById("pmInspectorInput").focus();
-    return;
-  }
-
-  const recordDate = parseInputDateToMs(draft.dateStr);
-  const entry = {
-    id: "PM-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6).toUpperCase(),
-    equipmentCode: eq.code,
-    equipmentName: eq.name,
-    branch: "Elektrik",
-    periodLabel: eq.periodLabel,
-    status: targetStatus,
-    missingMaterial: clean(draft.missingMaterial),
-    findings: clean(draft.findings),
-    inspector,
-    recordDate,
-    savedAt: Date.now()
-  };
-
-  if (!pmLogs[eq.code] || Array.isArray(pmLogs[eq.code])) {
-    const arr = Array.isArray(pmLogs[eq.code]) ? pmLogs[eq.code] : [];
-    const obj = {};
-    arr.forEach(x => { if (x && x.id) obj[x.id] = x; });
-    pmLogs[eq.code] = obj;
-  }
-  pmLogs[eq.code][entry.id] = entry;
-  savePmLogsLocal();
-
-  if (pmLogsRef) {
-    pmLogsRef.child(eq.code).child(entry.id).set(entry).catch(() => {});
-  }
-
-  if (targetStatus === "Biten") {
-    delete pmDrafts[eq.code];
-    savePmDraftsLocal();
-  }
-
-  renderPmView();
-  alert(`${eq.code} (${fmtShortDate(recordDate)}) '${targetStatus}' olarak kaydedildi.`);
-}
-
-function copyCurrentPmQrLink() {
-  const url = new URL(window.location.href);
-  url.searchParams.set("pm", activePmCode);
-  const link = url.toString();
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(link).then(() => alert("QR linki kopyalandı:\n" + link)).catch(() => alert(link));
-  } else {
-    alert(link);
-  }
-}
-
-function downloadOriginalPmExcel() {
-  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
-  const fileName = eq.originalExcelFile;
-  if (!fileName) return;
-  const encodedUrl = encodeURI(fileName);
-  fetch(encodedUrl)
-    .then(res => {
-      if (!res.ok) throw new Error("Dosya bulunamadı");
-      return res.blob();
-    })
-    .then(blob => {
-      const a = document.createElement("a");
-      const objectUrl = URL.createObjectURL(blob);
-      a.href = objectUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
-    })
-    .catch(() => {
-      const a = document.createElement("a");
-      a.href = encodedUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    });
-}
-
-/* Arıza Takip & Pano */
-function getActor(fallback) {
-  const v = clean(document.getElementById("currentActor").value);
-  return v || fallback || "TEKNİSYEN";
-}
-function getKaliteActor() {
-  return clean(document.getElementById("kaliteActor").value) || "KALİTE";
-}
-
-function notifyTeam(title, message, topic = NTFY_TOPIC) {
-  try {
-    fetch(`${NTFY_SERVER}/${encodeURIComponent(topic)}`, {
-      method: "POST",
-      headers: { "Title": title, "Priority": "default" },
-      body: message
-    }).catch(() => {});
-  } catch (e) {}
-}
-function copyTopicValue(topic) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(topic).then(() => alert("Kanal adı kopyalandı: " + topic)).catch(() => alert(topic));
-  } else {
-    alert(topic);
-  }
-}
-function sendTestNotification() {
-  notifyTeam("Test Bildirimi", "Bakım ekibi bildirim kanalı aktif.");
-  alert("Test bildirimi gönderildi.");
-}
-function sendKaliteTestNotification() {
-  notifyTeam("Kalite Test Bildirimi", "Kalite birimi bildirim kanalı aktif.", KALITE_NTFY_TOPIC);
-  alert("Kalite test bildirimi gönderildi.");
-}
-
-function formatTicketNo(n) { return "ARZ-" + String(n || 1).padStart(4, "0"); }
-function nextTicketNo() { return tickets.reduce((m, t) => Math.max(m, Number(t.ticketNo) || 0), 0) + 1; }
-
-function triggerPhotoUpload(slot) { document.getElementById("photo" + slot).click(); }
-function removePhoto(e, slot) {
-  e.stopPropagation();
-  photos[slot - 1] = null;
-  document.getElementById("photo" + slot).value = "";
-  document.getElementById("p" + slot + "-img").src = "";
-  document.getElementById("p" + slot + "-img").classList.add("hidden");
-  document.getElementById("p" + slot + "-remove").classList.add("hidden");
-  document.getElementById("p" + slot + "-text").classList.remove("hidden");
-}
-function handlePhotoSelect(input, slot) {
-  const file = input.files && input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      const maxDim = 900;
-      let w = img.width, h = img.height;
-      if (w > maxDim || h > maxDim) {
-        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-        else { w = Math.round(w * maxDim / h); h = maxDim; }
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = w; canvas.height = h;
-      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
-      photos[slot - 1] = dataUrl;
-      document.getElementById("p" + slot + "-img").src = dataUrl;
-      document.getElementById("p" + slot + "-img").classList.remove("hidden");
-      document.getElementById("p" + slot + "-remove").classList.remove("hidden");
-      document.getElementById("p" + slot + "-text").classList.add("hidden");
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function handleFormSubmit(ev) {
-  ev.preventDefault();
-  const location = clean(document.getElementById("lokasyonInput").value);
-  const reporter = clean(document.getElementById("bildirenInput").value);
-  const description = clean(document.getElementById("aciklamaInput").value);
-  if (!location || reporter.length < 4 || !description) {
-    alert("Lütfen tüm zorunlu alanları doldurun.");
-    return;
-  }
-  const now = Date.now();
-  const id = "T-" + now + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
-  const ticketNo = nextTicketNo();
-  const newTicket = {
-    id,
-    ticketNo,
-    location,
-    reporter,
-    description,
-    photos: photos.filter(Boolean),
-    status: "Bekliyor",
-    createdAt: now,
-    updatedAt: now,
-    history: [{ time: now, status: "Bekliyor", actor: reporter, note: "Yeni arıza bildirimi oluşturuldu" }]
-  };
-
-  tickets.unshift(newTicket);
-  saveLocal();
-  renderAll();
-
-  if (ticketsRef) {
-    ticketsRef.child(id).set(newTicket).catch(() => {});
-  }
-
-  notifyTeam(
-    `Yeni Arıza (${formatTicketNo(ticketNo)}) - ${location}`,
-    `Bildiren: ${reporter}\nAçıklama: ${description}`
-  );
-
-  document.getElementById("arizaForm").reset();
-  [1, 2].forEach(i => {
-    photos[i - 1] = null;
-    document.getElementById("p" + i + "-img").src = "";
-    document.getElementById("p" + i + "-img").classList.add("hidden");
-    document.getElementById("p" + i + "-remove").classList.add("hidden");
-    document.getElementById("p" + i + "-text").classList.remove("hidden");
-  });
-  alert(`Arıza kaydı açıldı: ${formatTicketNo(ticketNo)}`);
-}
-
-function updateTicket(id, newStatus) {
-  const t = tickets.find(x => x.id === id);
-  if (!t) return;
-  const noteEl = document.getElementById("note-" + id);
-  const note = clean(noteEl ? noteEl.value : "");
-  const actor = getActor(t.reporter);
-  const now = Date.now();
-
-  if (!Array.isArray(t.history)) t.history = [];
-  t.status = newStatus;
-  t.updatedAt = now;
-  t.lastActor = actor;
-  t.history.push({ time: now, status: newStatus, actor, note: note || `Durum '${newStatus}' olarak güncellendi` });
-  if (newStatus === "Tamamlandı" && !t.completedAt) {
-    t.completedAt = now;
-    t.cleaningStatus = "Bekliyor";
-  }
-
-  saveLocal();
-  renderAll();
-  if (ticketsRef) ticketsRef.child(id).set(t).catch(() => {});
-
-  notifyTeam(
-    `${formatTicketNo(t.ticketNo)} · ${newStatus}`,
-    `Lokasyon: ${t.location}\nTeknisyen: ${actor}${note ? "\nNot: " + note : ""}`,
-    KALITE_NTFY_TOPIC
-  );
-}
-
-function deleteTicket(id) {
-  if (!ustaUnlocked) { alert("Silmek için Bakımcı Girişi yapın."); return; }
-  if (!confirm("Bu arıza kaydını silmek istediğinize emin misiniz?")) return;
-  tickets = tickets.filter(x => x.id !== id);
-  saveLocal();
-  renderAll();
-  if (ticketsRef) ticketsRef.child(id).remove().catch(() => {});
-}
-
-function toggleUstaLock() {
-  ustaUnlocked = !ustaUnlocked;
-  document.getElementById("lockStatusText").textContent = ustaUnlocked ? "Bakımcı Açık" : "Bakımcı Girişi";
-  renderTickets();
-}
-
-function toggleKaliteLock() {
-  kaliteUnlocked = !kaliteUnlocked;
-  document.getElementById("kaliteLockStatusText").textContent = kaliteUnlocked ? "Kalite Açık" : "Kalite Girişi";
-  renderKalite();
-}
-
-function setCleaningResult(id, result) {
-  const t = tickets.find(x => x.id === id);
-  if (!t) return;
-  const noteEl = document.getElementById("knote-" + id);
-  const note = clean(noteEl ? noteEl.value : "");
-  const actor = getKaliteActor();
-  const now = Date.now();
-  t.cleaningStatus = result;
-  t.cleaningBy = actor;
-  t.cleaningAt = now;
-  t.cleaningNote = note;
-  if (!Array.isArray(t.history)) t.history = [];
-  t.history.push({ time: now, status: t.status, actor, note: `Kalite Temizlik Onayı: ${result}${note ? " (" + note + ")" : ""}` });
-  saveLocal();
-  renderAll();
-  if (ticketsRef) ticketsRef.child(id).set(t).catch(() => {});
-}
-
-function setStatusFilter(st) {
-  const cur = document.getElementById("statusFilter").value;
-  document.getElementById("statusFilter").value = cur === st ? "ALL" : st;
-  renderTickets();
-}
-
-function switchArchiveTab(arch) {
-  isArchiveView = arch;
-  document.getElementById("activeTab").classList.toggle("active", !arch);
-  document.getElementById("archiveTab").classList.toggle("active", arch);
-  renderTickets();
-}
-
-function updateCounts() {
-  const counts = { "Bekliyor": 0, "İşlemde": 0, "Parça Bekliyor": 0, "Servis Bekliyor": 0, "Tamamlandı": 0 };
-  tickets.forEach(t => { if (counts[t.status] !== undefined) counts[t.status]++; });
-  document.getElementById("countBekliyor").textContent = counts["Bekliyor"];
-  document.getElementById("countIslemde").textContent = counts["İşlemde"];
-  document.getElementById("countParca").textContent = counts["Parça Bekliyor"];
-  document.getElementById("countServis").textContent = counts["Servis Bekliyor"];
-  document.getElementById("countTamam").textContent = counts["Tamamlandı"];
-
-  const pendingKalite = tickets.filter(t => isDone(t) && t.cleaningStatus !== "OK" && t.cleaningStatus !== "NOK").length;
-  document.getElementById("kaliteBadgeCount").textContent = pendingKalite;
-}
-
-function renderTickets() {
-  updateCounts();
-  const stFilter = document.getElementById("statusFilter").value;
-  const q = clean(document.getElementById("ticketSearch").value).toLocaleLowerCase("tr-TR");
-  const grid = document.getElementById("counterGrid");
-  grid.classList.toggle("has-filter", stFilter !== "ALL");
-  grid.querySelectorAll(".counter").forEach(b => b.classList.toggle("active", b.dataset.st === stFilter));
-
-  const list = tickets.filter(t => {
-    const done = isDone(t);
-    if (stFilter !== "ALL") {
-      if (t.status !== stFilter) return false;
-    } else if (isArchiveView !== done) {
-      return false;
-    }
-    if (!q) return true;
-    const hay = `${formatTicketNo(t.ticketNo)} ${t.location || ""} ${t.reporter || ""} ${t.description || ""}`.toLocaleLowerCase("tr-TR");
-    return hay.includes(q);
-  });
-
-  const container = document.getElementById("ticketContainer");
-  if (!list.length) {
-    container.innerHTML = `<div class="empty">Gösterilecek arıza kaydı bulunmuyor.</div>`;
-    return;
-  }
-
-  container.innerHTML = list.map(t => {
-    const nexts = STATUS_TRANSITIONS[t.status] || [];
-    const hist = Array.isArray(t.history) ? t.history : [];
-    const photosHtml = Array.isArray(t.photos) && t.photos.length
-      ? `<div class="photos">${t.photos.map(p => `<img src="${p}" alt="Fotoğraf" onclick="openImage('${p}')">`).join("")}</div>`
-      : "";
-    const actionsHtml = nexts.length ? `
-      <div class="actions">
-        <input id="note-${esc(t.id)}" class="input" placeholder="İşlem / parça / servis notu (isteğe bağlı)">
-        <div class="row">
-          ${nexts.includes("İşlemde") ? `<button class="btn small st-islem" onclick="updateTicket('${esc(t.id)}','İşlemde')">İşleme Al</button>` : ""}
-          ${nexts.includes("Parça Bekliyor") ? `<button class="btn small st-parca" onclick="updateTicket('${esc(t.id)}','Parça Bekliyor')">Parça Bekliyor</button>` : ""}
-          ${nexts.includes("Servis Bekliyor") ? `<button class="btn small st-servis" onclick="updateTicket('${esc(t.id)}','Servis Bekliyor')">Servis Bekliyor</button>` : ""}
-          ${nexts.includes("Tamamlandı") ? `<button class="btn small st-tamam" onclick="updateTicket('${esc(t.id)}','Tamamlandı')">Tamamlandı</button>` : ""}
-          ${ustaUnlocked ? `<button class="btn small danger" onclick="deleteTicket('${esc(t.id)}')">Sil</button>` : ""}
-        </div>
-      </div>` : (ustaUnlocked ? `<div class="actions"><div class="row"><button class="btn small danger" onclick="deleteTicket('${esc(t.id)}')">Sil</button></div></div>` : "");
-
-    return `
-      <article class="ticket" data-status="${esc(t.status)}">
-        <div class="ticket-head">
-          <div class="ticket-id">
-            <div class="ticket-title">${esc(t.location)}</div>
-            <div class="ticket-no">${esc(formatTicketNo(t.ticketNo))}</div>
-          </div>
-          <div class="ticket-state">
-            <span class="badge">${esc(t.status)}</span>
-            <span class="age">${esc(ageText(t.createdAt))}</span>
-          </div>
-        </div>
-        <div class="ticket-info">${esc(t.description)}</div>
-        <div class="meta">
-          <span><strong>Bildiren:</strong> ${esc(t.reporter)}</span>
-          <span><strong>Açılış:</strong> ${esc(fmtDate(t.createdAt))}</span>
-          <span><strong>Güncelleme:</strong> ${esc(fmtDate(t.updatedAt))}</span>
-          ${t.cleaningStatus ? `<span><strong>Kalite:</strong> ${esc(t.cleaningStatus)}</span>` : ""}
-        </div>
-        ${photosHtml}
-        <details class="history"><summary>İşlem Geçmişi (${hist.length})</summary>${hist.map(h => `<div class="history-item"><strong>${esc(fmtDate(h.time))}</strong> · ${esc(h.status)} · ${esc(h.actor || "-")} — ${esc(h.note || "")}</div>`).join("")}</details>
-        ${actionsHtml}
-      </article>`;
-  }).join("");
-}
-
-function renderKalite() {
-  const list = tickets.filter(t => isDone(t));
-  const el = document.getElementById("kaliteContainer");
-  if (!list.length) {
-    el.innerHTML = `<div class="empty">Henüz tamamlanmış arıza kaydı bulunmuyor.</div>`;
-    return;
-  }
-  el.innerHTML = list.map(t => {
-    const cs = t.cleaningStatus || "Bekliyor";
-    return `
-      <article class="ticket" data-status="${esc(t.status)}">
-        <div class="ticket-head">
-          <div class="ticket-id"><div class="ticket-title">${esc(t.location)}</div><div class="ticket-no">${esc(formatTicketNo(t.ticketNo))}</div></div>
-          <span class="badge">${esc(cs)}</span>
-        </div>
-        <div class="ticket-info">${esc(t.description)}</div>
-        <div class="meta"><span><strong>Bildiren:</strong> ${esc(t.reporter)}</span><span><strong>Bitiş:</strong> ${esc(fmtDate(t.completedAt || t.updatedAt))}</span>${t.cleaningBy ? `<span><strong>Onaylayan:</strong> ${esc(t.cleaningBy)}</span>` : ""}</div>
-        <div class="actions">
-          <input id="knote-${esc(t.id)}" class="input" value="${esc(t.cleaningNote || "")}" placeholder="Temizlik / ortam kontrol notu">
-          <div class="row">
-            <button class="btn small success" onclick="setCleaningResult('${esc(t.id)}','OK')">OK (Temiz)</button>
-            <button class="btn small danger" onclick="setCleaningResult('${esc(t.id)}','NOK')">NOK (Eksik)</button>
-          </div>
-        </div>
-      </article>`;
-  }).join("");
-}
-
-function populateMonthSelect() {
-  const sel = document.getElementById("aySecimi");
-  const cur = sel.value;
-  const set = new Set(tickets.map(t => monthKey(t.createdAt)).filter(Boolean));
-  const keys = Array.from(set).sort().reverse();
-  sel.innerHTML = `<option value="ALL">Tüm zamanlar</option>` + keys.map(k => `<option value="${k}">${esc(monthLabel(k))}</option>`).join("");
-  if (keys.includes(cur)) sel.value = cur;
-}
-
-function getFilteredReportTickets() {
-  const m = document.getElementById("aySecimi").value;
-  const st = document.getElementById("reportStatus").value;
-  const loc = clean(document.getElementById("reportLocation").value).toLocaleLowerCase("tr-TR");
-  const rep = clean(document.getElementById("reportReporter").value).toLocaleLowerCase("tr-TR");
-  const tech = clean(document.getElementById("reportTechnician").value).toLocaleLowerCase("tr-TR");
-
-  return tickets.filter(t => {
-    if (m !== "ALL" && monthKey(t.createdAt) !== m) return false;
-    if (st !== "ALL" && t.status !== st) return false;
-    if (loc && !String(t.location || "").toLocaleLowerCase("tr-TR").includes(loc)) return false;
-    if (rep && !String(t.reporter || "").toLocaleLowerCase("tr-TR").includes(rep)) return false;
-    if (tech) {
-      const hMatch = Array.isArray(t.history) && t.history.some(h => String(h.actor || "").toLocaleLowerCase("tr-TR").includes(tech));
-      const lMatch = String(t.lastActor || "").toLocaleLowerCase("tr-TR").includes(tech);
-      if (!hMatch && !lMatch) return false;
-    }
+async function sendNotification(title,message,targetTopic=null){
+  const topic=String(targetTopic||ntfyTopic||NTFY_TOPIC||'').trim();
+  if(!topic)return false;
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),10000);
+  try{
+    const params=new URLSearchParams({title:String(title).slice(0,120),priority:'4',tags:'wrench'});
+    if(/^https?:/.test(location.href))params.set('click',location.href.split('#')[0]);
+    const url='https://ntfy.sh/'+encodeURIComponent(topic)+'?'+params.toString();
+    const response=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:String(message).slice(0,1000),signal:controller.signal});
+    if(!response.ok){const detail=await response.text().catch(()=> '');throw new Error(detail||'ntfy HTTP '+response.status);}
     return true;
-  });
+  }catch(error){console.error('ntfy bildirimi gönderilemedi:',error);return false;}
+  finally{clearTimeout(timeout);}
 }
-
-function updateRaporSummary() {
-  const list = getFilteredReportTickets();
-  const tamam = list.filter(t => t.status === "Tamamlandı").length;
-  const acik = list.length - tamam;
-  document.getElementById("raporOzet").innerHTML = `
-    <div class="stats">
-      <div class="stat"><span>Toplam Kayıt</span><strong>${list.length}</strong></div>
-      <div class="stat tamam"><span>Tamamlanan</span><strong>${tamam}</strong></div>
-      <div class="stat acik"><span>Açık / Bekleyen</span><strong>${acik}</strong></div>
-    </div>`;
-  document.getElementById("reportPreview").textContent = `${list.length} kayıt filtrelendi.`;
+async function sendTestNotification(){
+  const ok=await sendNotification('Arıza Takip Test Bildirimi','Bildirim bağlantısı çalışıyor. Bu mesajı aldıysanız ntfy kurulumu başarılı.',NTFY_TOPIC);
+  alert(ok?'Test bildirimi ntfy kanalına gönderildi. Telefonunuza ulaşıp ulaşmadığını kontrol edin.':'Bildirim gönderilemedi. İnternet bağlantısını ve tarayıcı konsolundaki ntfy hatasını kontrol edin.');
 }
-
-function exportToExcel() {
-  if (typeof XLSX === "undefined") { alert("Excel kütüphanesi yüklenemedi."); return; }
-  const list = getFilteredReportTickets();
-  const mainRows = list.map(t => ({
-    "Kayıt No": formatTicketNo(t.ticketNo),
-    "Lokasyon": t.location || "",
-    "Bildiren": t.reporter || "",
-    "Açıklama": t.description || "",
-    "Durum": t.status || "",
-    "Açılış": fmtDate(t.createdAt),
-    "Güncelleme": fmtDate(t.updatedAt),
-    "Kalite Temizlik Sonucu": t.cleaningStatus || "-"
-  }));
-  const histRows = [];
-  list.forEach(t => {
-    (Array.isArray(t.history) ? t.history : []).forEach(h => {
-      histRows.push({
-        "Kayıt No": formatTicketNo(t.ticketNo),
-        "Lokasyon": t.location || "",
-        "Tarih": fmtDate(h.time),
-        "Durum": h.status || "",
-        "Kişi": h.actor || "",
-        "Not": h.note || ""
+async function sendKaliteTestNotification(){
+  const ok=await sendNotification('Kalite Bildirim Testi','Kalite birimi ntfy bildirim kanalı çalışıyor.',KALITE_NTFY_TOPIC);
+  alert(ok?'Kalite test bildirimi gönderildi.':'Kalite test bildirimi gönderilemedi.');
+}
+function updatePanelSoundButton(){
+  const b=$('panelSoundBtn');if(!b)return;
+  b.textContent='🔔 Zil + Sesli Anons · Test Et';
+  b.classList.add('primary');
+  b.title='Kısa zilin ardından Türkçe sesle “Dikkat! Yeni arıza bildirimi geldi.” anonsunu test eder.';
+}
+async function unlockPanelSound(){
+  if(!panelSoundEnabled)return false;
+  try{
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextClass)throw new Error('Bu tarayıcı sesli uyarıyı desteklemiyor.');
+    if(!panelAudioContext)panelAudioContext=new AudioContextClass();
+    if(panelAudioContext.state==='suspended')await panelAudioContext.resume();
+    const active=panelAudioContext.state==='running';
+    if(active&&pendingPanelSound){pendingPanelSound=false;playNewFaultSound();}
+    return active;
+  }catch(error){console.warn('Ses etkinleştirilemedi:',error);return false;}
+}
+function playShortFaultChime(){
+  if(!panelSoundEnabled||!panelAudioContext||panelAudioContext.state!=='running'){
+    pendingPanelSound=true;
+    return false;
+  }
+  try{
+    const ctx=panelAudioContext;
+    const start=ctx.currentTime+.02;
+    const notes=[880,1174.66];
+    notes.forEach((frequency,index)=>{
+      const at=start+index*.17;
+      [{mult:1,level:.22},{mult:2.756,level:.05},{mult:5.404,level:.012}].forEach(partial=>{
+        const osc=ctx.createOscillator(),gain=ctx.createGain();
+        osc.type='sine';
+        osc.frequency.setValueAtTime(frequency*partial.mult,at);
+        gain.gain.setValueAtTime(.0001,at);
+        gain.gain.exponentialRampToValueAtTime(partial.level,at+.018);
+        gain.gain.exponentialRampToValueAtTime(.0001,at+.52);
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.start(at);osc.stop(at+.54);
       });
     });
-  });
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mainRows), "Arizalar");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(histRows), "Islem_Gecmisi");
-  XLSX.writeFile(wb, "Fabrika_Ariza_Raporu.xlsx");
+    return true;
+  }catch(error){
+    console.warn('Zil sesi çalınamadı:',error);
+    return false;
+  }
 }
-
-function populateDatalists() {
-  const locs = Array.from(new Set(tickets.map(t => clean(t.location)).filter(Boolean)));
-  const reps = Array.from(new Set(tickets.map(t => clean(t.reporter)).filter(Boolean)));
-  const techs = new Set();
-  tickets.forEach(t => {
-    if (t.lastActor) techs.add(clean(t.lastActor));
-    (Array.isArray(t.history) ? t.history : []).forEach(h => { if (h.actor) techs.add(clean(h.actor)); });
-  });
-  document.getElementById("lokasyonHafiza").innerHTML = locs.map(x => `<option value="${esc(x)}">`).join("");
-  document.getElementById("bildirenHafiza").innerHTML = reps.map(x => `<option value="${esc(x)}">`).join("");
-  document.getElementById("ustaHafiza").innerHTML = Array.from(techs).map(x => `<option value="${esc(x)}">`).join("");
+function speakFaultAnnouncement(){
+  if(!panelSoundEnabled)return;
+  if(!('speechSynthesis' in window)||!window.SpeechSynthesisUtterance){
+    console.warn('Bu tarayıcı Türkçe sesli anons özelliğini desteklemiyor.');
+    return;
+  }
+  try{
+    const utterance=new SpeechSynthesisUtterance('Dikkat! Yeni arıza bildirimi geldi.');
+    utterance.lang='tr-TR';
+    utterance.rate=.96;
+    utterance.pitch=1;
+    utterance.volume=1;
+    const voices=window.speechSynthesis.getVoices();
+    const turkishVoice=voices.find(v=>(v.lang||'').toLowerCase().startsWith('tr'));
+    if(turkishVoice)utterance.voice=turkishVoice;
+    window.speechSynthesis.speak(utterance);
+  }catch(error){console.warn('Sesli arıza anonsu başlatılamadı:',error);}
 }
+function playNewFaultSound(){
+  if(!panelSoundEnabled)return;
+  if(!panelAudioContext||panelAudioContext.state!=='running'){
+    pendingPanelSound=true;
+    return;
+  }
+  pendingPanelSound=false;
+  playShortFaultChime();
+  setTimeout(()=>speakFaultAnnouncement(),620);
+}
+async function testPanelSound(){
+  panelSoundEnabled=true;
+  updatePanelSoundButton();
+  const ready=await unlockPanelSound();
+  if(!ready){alert('Ses açılamadı. Sayfanın içine bir kez tıklayın ve tarayıcı ses izinlerini kontrol edin.');return;}
+  pendingPanelSound=false;
+  if(!('speechSynthesis' in window))alert('Bu tarayıcıda sesli anons desteklenmiyor. Kısa zil yine çalışabilir.');
+  playNewFaultSound();
+}
+document.addEventListener('pointerdown',()=>{
+  if(panelSoundEnabled&&(!panelAudioContext||panelAudioContext.state!=='running'))void unlockPanelSound();
+},{capture:true});
+function escapeHTML(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function formatUpper(el){const p=el.selectionStart;el.value=el.value.toLocaleUpperCase('tr-TR');try{el.setSelectionRange(p,p)}catch(e){}}
+function statusText(){
+  const el=$('connectionStatus');if(!el)return;
+  const connected=!!(firebaseReady&&firebaseAuthReady&&databaseReadReady&&databaseWriteReady&&!lastSyncError);
+  el.className=connected?'statusline ok':'statusline err';
+  el.textContent=connected?'☁ Bağlı':'⚠ Bağlı değil';
+}
+function fmtDur(m){m=Math.max(0,Math.round(m));if(m<60)return m+' dk';if(m<1440)return Math.floor(m/60)+' sa '+(m%60)+' dk';return Math.floor(m/1440)+' gün '+Math.floor((m%1440)/60)+' sa';}
+function setStatusFilter(v){if(v==='Tamamlandı'){switchArchiveTab(true);return;}const f=$('statusFilter');f.value=(f.value===v&&!archiveMode)?'ALL':v;if(archiveMode){switchArchiveTab(false);return;}renderTickets();}
+function showSection(id){
+  if(id==='pano-section'&&!ustaLoggedIn){
+    const p=prompt('Bakım paneline erişmek için bakımcı şifresini giriniz:');
+    if(p!==USTA_SIFRESI){if(p!==null)alert('Hatalı şifre.');return false;}
+    ustaLoggedIn=true;raporUnlocked=true;rememberLogin(USTA_LOGIN_STORAGE_KEY,true);
+    $('lockStatusText').textContent='Bakımcı Oturumu Açık';
+  }
+  if(id==='kalite-section'&&!kaliteLoggedIn){
+    const p=prompt('Kalite Kontrol ekranına erişmek için kalite şifresini giriniz:');
+    if(p!==KALITE_SIFRESI){if(p!==null)alert('Hatalı şifre.');return false;}
+    kaliteLoggedIn=true;rememberLogin(KALITE_LOGIN_STORAGE_KEY,true);
+    $('kaliteLockStatusText').textContent='Kalite Oturumu Açık';
+  }
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.sec===id));
+  ['form-section','pano-section','kalite-section','rapor-section'].forEach(x=>$(x).classList.add('hidden'));
+  $(id).classList.remove('hidden');
+  if(id==='pano-section'){renderTickets();syncIncremental(false);}
+  if(id==='kalite-section'){renderKalite();syncIncremental(false);}
+  if(id==='rapor-section'){populateMonthDropdown();updateRaporSummary();syncIncremental(false);}
+  return true;
+}
+function handleReportNav(){
+  if(!raporUnlocked){const p=prompt('Rapor sayfasına erişmek için bakımcı şifresini giriniz:');if(p===USTA_SIFRESI){raporUnlocked=true;ustaLoggedIn=true;rememberLogin(USTA_LOGIN_STORAGE_KEY,true);const lockText=$('lockStatusText');if(lockText)lockText.textContent='Bakımcı Oturumu Açık';}else{if(p!==null)alert('Hatalı şifre.');return;}}
+  showSection('rapor-section');
+}
+function openSettings(){
+  const connected=!!(firebaseReady&&firebaseAuthReady&&databaseReadReady&&databaseWriteReady&&!lastSyncError);
+  $('settingsMessage').textContent='Firebase bağlantısı arka planda otomatik kontrol edilir. Şu an: '+(connected?'Bağlı':'Bağlı değil')+'. Kontrol bağlantı açıldığında, yeniden bağlandığında, sayfaya dönüldüğünde ve 5 dakikada bir yapılır.';
+  $('settingsModal').classList.remove('hidden');
+}
+async function copyTopicValue(val){try{await navigator.clipboard.writeText(val);alert('Kanal adı kopyalandı: '+val);}catch(e){prompt('Bildirim kanalı:',val);}}
+function closeSettings(){$('settingsModal').classList.add('hidden');}
 
-function testPanelSound() {
-  panelSoundEnabled = !panelSoundEnabled;
-  document.getElementById("panelSoundBtn").textContent = panelSoundEnabled ? "🔔 Sesli Uyarı Açık" : "🔕 Sesli Uyarı Kapalı";
-  if (panelSoundEnabled) {
-    try {
-      soundCtx = soundCtx || new (window.AudioContext || window.webkitAudioContext)();
-      const o = soundCtx.createOscillator(), g = soundCtx.createGain();
-      o.connect(g); g.connect(soundCtx.destination);
-      o.frequency.value = 660; g.gain.value = 0.08;
-      o.start(); setTimeout(() => o.stop(), 180);
-    } catch (e) {}
+async function reserveTicketNumber(){
+  if(!firebaseDb)throw new Error('Firebase bağlantısı hazır değil.');
+  const year=new Date().getFullYear();
+  const counterRef=firebaseDb.ref('meta/counters/'+year);
+  const result=await counterRef.transaction(current=>(Number(current)||0)+1);
+  if(!result.committed)throw new Error('Kayıt numarası ayrılamadı.');
+  return 'ARZ-'+year+'-'+String(result.snapshot.val()).padStart(4,'0');
+}
+async function createRemoteTicket(ticket){
+  if(!firebaseDb)throw new Error('Firebase bağlantısı hazır değil.');
+  if(!firebaseAuthReady||!firebase.auth().currentUser)throw new Error('Firebase anonim oturumu henüz hazır değil.');
+  const newRef=firebaseDb.ref('tickets').push();
+  ticket.remoteId=newRef.key;
+  ticket.id=ticket.id||newRef.key;
+  ticket.kayitNo=await reserveTicketNumber();
+  ticket.updatedAt=new Date().toISOString();
+  await newRef.set(ticket);
+  const verification=await newRef.once('value');
+  if(!verification.exists())throw new Error('Firebase kaydı yazdı ancak geri okuma doğrulanamadı.');
+  databaseReadReady=true;
+  databaseWriteReady=true;
+  lastHealthCheckAt=Date.now();
+  lastSyncError='';
+  lastSyncAt=new Date();
+  statusText();
+  return ticket;
+}
+function normalizeTicket(t){
+  const now=new Date().toISOString();
+  t=t||{};
+  t.id=t.id||Date.now()+Math.floor(Math.random()*1000);
+  t.rawDate=t.rawDate||now;
+  t.tarihStr=t.tarihStr||new Date(t.rawDate).toLocaleString('tr-TR');
+  t.statu=t.statu||'Bekliyor';
+  t.ustalar=Array.isArray(t.ustalar)?t.ustalar:[];
+  t.fotograflar=Array.isArray(t.fotograflar)?t.fotograflar:[];
+  t.islemGecmisi=Array.isArray(t.islemGecmisi)?t.islemGecmisi:[];
+  t.teknikNot=t.teknikNot||'';
+  t.kayitNo=t.kayitNo||'ARZ-'+new Date(t.rawDate).getFullYear()+'-'+String(t.id).slice(-4);
+  t.kaliteKontrol=(t.kaliteKontrol&&typeof t.kaliteKontrol==='object')?t.kaliteKontrol:{durum:'Yok',temizMi:null,zaman:null,zamanStr:'',onaylayan:''};
+  return t;
+}
+function rebuildMemories(){const loc=new Set(),rep=new Set(),tech=new Set();arizaKayitlari.forEach(t=>{if(t.lokasyon)loc.add(t.lokasyon);if(t.bildiren)rep.add(t.bildiren);(t.ustalar||[]).forEach(x=>tech.add(x));(t.islemGecmisi||[]).forEach(x=>{if(x.eylemYapan)tech.add(x.eylemYapan)});});hafizaLokasyonlar=[...loc].sort();hafizaBildirenler=[...rep].sort();hafizaUstalar=[...tech].sort();fillDatalist('lokasyonHafiza',hafizaLokasyonlar);fillDatalist('bildirenHafiza',hafizaBildirenler);fillDatalist('ustaHafiza',hafizaUstalar);}
+function fillDatalist(id,items){const el=$(id);if(!el)return;el.innerHTML=items.map(x=>`<option value="${escapeHTML(x)}"></option>`).join('');}
+function renderKeep(){const keep={};document.querySelectorAll('#ticketContainer textarea,#ticketContainer input').forEach(e=>{if(e.id&&e.value)keep[e.id]=e.value;});renderTickets();renderKalite();Object.entries(keep).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v;});}
+function upsertLocalTicket(key,value,fromLive=false){
+  if(!value)return;
+  const ticket=normalizeTicket({...value,remoteId:key});
+  const ix=arizaKayitlari.findIndex(t=>String(t.remoteId)===String(key));
+  const isNew=ix<0;
+  if(isNew)arizaKayitlari.push(ticket);else arizaKayitlari[ix]=ticket;
+  arizaKayitlari.sort((a,b)=>new Date(b.rawDate)-new Date(a.rawDate));
+  rebuildMemories();renderKeep();populateMonthDropdown();updateRaporSummary();
+  lastSyncAt=new Date();statusText();
+  if(fromLive&&isNew&&initialSyncComplete&&!$('pano-section').classList.contains('hidden'))playNewFaultSound();
+}
+function startRealtimeListeners(){
+  if(realtimeListenersStarted||!firebaseDb)return realtimeStartPromise||Promise.resolve();
+  realtimeListenersStarted=true;realtimeLoading=true;realtimePending=new Map();realtimePendingRemoved=new Set();
+  const ref=firebaseDb.ref('tickets');
+  const onAdded=snap=>{if(realtimeLoading){realtimePending.set(snap.key,snap.val());realtimePendingRemoved.delete(snap.key);return;}const isNew=!startupKnownIds.has(snap.key);startupKnownIds.add(snap.key);upsertLocalTicket(snap.key,snap.val(),isNew);};
+  const onChanged=snap=>{if(realtimeLoading){realtimePending.set(snap.key,snap.val());realtimePendingRemoved.delete(snap.key);return;}startupKnownIds.add(snap.key);upsertLocalTicket(snap.key,snap.val(),false);};
+  const onRemoved=snap=>{if(realtimeLoading){realtimePending.delete(snap.key);realtimePendingRemoved.add(snap.key);return;}startupKnownIds.delete(snap.key);arizaKayitlari=arizaKayitlari.filter(t=>String(t.remoteId)!==String(snap.key));rebuildMemories();renderKeep();populateMonthDropdown();updateRaporSummary();};
+  const onError=err=>{databaseReadReady=false;lastSyncError=(err.code?err.code+' — ':'')+(err.message||String(err));statusText();};
+  ref.on('child_added',onAdded,onError);ref.on('child_changed',onChanged,onError);ref.on('child_removed',onRemoved,onError);
+  realtimeStartPromise=(async()=>{
+    try{
+      const snap=await ref.once('value');
+      const records=new Map();
+      snap.forEach(child=>records.set(child.key,normalizeTicket({...child.val(),remoteId:child.key})));
+      startupKnownIds=new Set(records.keys());
+      realtimePending.forEach((value,key)=>{records.set(key,normalizeTicket({...value,remoteId:key}));startupKnownIds.add(key);});
+      realtimePendingRemoved.forEach(key=>{records.delete(key);startupKnownIds.delete(key);});
+      arizaKayitlari=[...records.values()].sort((a,b)=>new Date(b.rawDate)-new Date(a.rawDate));
+      realtimePending.clear();realtimePendingRemoved.clear();realtimeLoading=false;initialSyncComplete=true;
+      databaseReadReady=true;lastSyncError='';
+      rebuildMemories();renderKeep();populateMonthDropdown();updateRaporSummary();lastSyncAt=new Date();lastSyncError='';statusText();
+      return true;
+    }catch(error){
+      ref.off('child_added',onAdded);ref.off('child_changed',onChanged);ref.off('child_removed',onRemoved);
+      realtimeListenersStarted=false;realtimeLoading=false;realtimeStartPromise=null;
+      databaseReadReady=false;lastSyncError=(error?.code?error.code+' — ':'')+(error?.message||String(error));statusText();throw error;
+    }
+  })();
+  return realtimeStartPromise;
+}
+async function syncIncremental(full=false){
+  if(!firebaseDb)return false;
+  if(!realtimeListenersStarted)return startRealtimeListeners();
+  if(!full)return true;
+  if(syncBusy)return false;
+  syncBusy=true;
+  try{
+    const snap=await firebaseDb.ref('tickets').once('value');
+    const records=[];snap.forEach(child=>records.push(normalizeTicket({...child.val(),remoteId:child.key})));
+    arizaKayitlari=records.sort((a,b)=>new Date(b.rawDate)-new Date(a.rawDate));
+    startupKnownIds=new Set(records.map(t=>String(t.remoteId)));
+    rebuildMemories();renderKeep();populateMonthDropdown();updateRaporSummary();lastSyncAt=new Date();lastSyncError='';statusText();return true;
+  }catch(e){lastSyncError=e.message||String(e);statusText();return false;}
+  finally{syncBusy=false;}
+}
+async function syncAll(showMessage=true){const ok=await syncIncremental(true);if(showMessage)alert(ok?`Veriler güncel (${arizaKayitlari.length} arıza).`:'Eşitleme yapılamadı: '+lastSyncError);}
+
+async function compressImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('Fotoğraf okunamadı.'));reader.onload=e=>{const img=new Image();img.onerror=()=>reject(new Error('Fotoğraf açılamadı.'));img.onload=()=>{let max=800;const qualities=[.72,.62,.52,.42,.34];let result='';for(let pass=0;pass<8;pass++){const scale=Math.min(1,max/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);for(const q of qualities){result=canvas.toDataURL('image/jpeg',q);if(result.length<=18000){resolve(result);return;}}max=Math.round(max*.78);}if(result.length>18000){reject(new Error('Fotoğraf yeterince küçültülemedi. Daha küçük bir fotoğraf seçin.'));return;}resolve(result);};img.src=e.target.result;};reader.readAsDataURL(file);});}
+function triggerPhotoUpload(i){$('photo'+i).click();}
+async function handlePhotoSelect(input,i){if(!input.files?.[0])return;try{const data=await compressImage(input.files[0]);tempPhotos[i-1]=data;$('p'+i+'-img').src=data;$('p'+i+'-img').classList.remove('hidden');$('p'+i+'-text').classList.add('hidden');$('p'+i+'-remove').classList.remove('hidden');}catch(e){alert(e.message);input.value='';}}
+function removePhoto(e,i){e?.stopPropagation();tempPhotos[i-1]=null;$('photo'+i).value='';$('p'+i+'-img').src='';$('p'+i+'-img').classList.add('hidden');$('p'+i+'-text').classList.remove('hidden');$('p'+i+'-remove').classList.add('hidden');}
+
+async function handleFormSubmit(e){
+  e.preventDefault();
+  const btn=$('submitBtn');
+  btn.disabled=true;
+  btn.textContent='Kaydediliyor…';
+  try{
+    const lokasyon=$('lokasyonInput').value.trim().toLocaleUpperCase('tr-TR'),bildiren=$('bildirenInput').value.trim().toLocaleUpperCase('tr-TR'),aciklama=$('aciklamaInput').value.trim();
+    if(bildiren.length<4)throw new Error('Bildiren kişi adı en az 4 karakter olmalı.');
+    if(!lokasyon||!aciklama)throw new Error('Lokasyon ve açıklama zorunludur.');
+    const ticket={id:Date.now()+'-'+Math.floor(Math.random()*10000),kayitNo:'ARZ-ATANIYOR',tarihStr:new Date().toLocaleString('tr-TR'),rawDate:new Date().toISOString(),lokasyon,bildiren,aciklama,fotograflar:tempPhotos.filter(Boolean),statu:'Bekliyor',ustalar:[],teknikNot:'',ilkMudahaleTarihi:null,kapanisTarihi:null,sureDakika:0,kaliteKontrol:{durum:'Yok',temizMi:null,zaman:null,zamanStr:'',onaylayan:''},islemGecmisi:[{rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:'SİSTEM',islem:'Arıza bildirildi.'}]};
+    await createRemoteTicket(ticket);
+    sendNotification('Yeni arıza bildirimi',ticket.kayitNo+' · '+ticket.lokasyon+' · '+ticket.bildiren+'\n'+ticket.aciklama,NTFY_TOPIC).then(ok=>{if(!ok)console.warn('Yeni arıza bildirimi gönderilemedi.');});
+    upsertLocalTicket(ticket.remoteId,ticket,false);
+    rebuildMemories();
+    $('arizaForm').reset();
+    removePhoto(null,1);removePhoto(null,2);
+    alert('Arıza bildirimi kaydedildi. Kayıt No: '+ticket.kayitNo);
+    showSection('pano-section');
+  }catch(err){
+    alert('Kayıt yapılamadı: '+err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent='BİLDİRİMİ GÖNDER';
   }
 }
 
-function checkNewTicketsSound(arr) {
-  const activeIds = new Set(arr.filter(t => !isDone(t)).map(t => t.id));
-  if (isFirstLoad) { knownActiveIds = activeIds; isFirstLoad = false; return; }
-  let hasNew = false;
-  activeIds.forEach(id => { if (!knownActiveIds.has(id)) hasNew = true; });
-  knownActiveIds = activeIds;
-  if (hasNew && panelSoundEnabled) testPanelSound();
+function toggleUstaLock(){
+  if(ustaLoggedIn){
+    ustaLoggedIn=false;
+    raporUnlocked=false;
+    rememberLogin(USTA_LOGIN_STORAGE_KEY,false);
+    $('lockStatusText').textContent='Bakımcı Girişi';
+    showSection('form-section');
+    return;
+  }
+  const p=prompt('Bakımcı şifresini giriniz:');
+  if(p===USTA_SIFRESI){
+    ustaLoggedIn=true;
+    raporUnlocked=true;
+    rememberLogin(USTA_LOGIN_STORAGE_KEY,true);
+    $('lockStatusText').textContent='Bakımcı Oturumu Açık';
+    renderTickets();
+  }else if(p!==null)alert('Hatalı şifre.');
+}
+function toggleKaliteLock(){
+  if(kaliteLoggedIn){
+    kaliteLoggedIn=false;
+    rememberLogin(KALITE_LOGIN_STORAGE_KEY,false);
+    $('kaliteLockStatusText').textContent='Kalite Girişi';
+    showSection('form-section');
+    return;
+  }
+  const p=prompt('Kalite şifresini giriniz:');
+  if(p===KALITE_SIFRESI){
+    kaliteLoggedIn=true;
+    rememberLogin(KALITE_LOGIN_STORAGE_KEY,true);
+    $('kaliteLockStatusText').textContent='Kalite Oturumu Açık';
+    renderKalite();
+  }else if(p!==null)alert('Hatalı şifre.');
+}
+function switchArchiveTab(v){archiveMode=v;$('activeTab').classList.toggle('active',!v);$('archiveTab').classList.toggle('active',v);$('statusFilter').classList.toggle('hidden',v);renderTickets();}
+function badgeClass(s){return {'İşlemde':'islem','Parça Bekliyor':'parca','Servis Bekliyor':'servis','Tamamlandı':'tamam'}[s]||'';}
+function kaliteLabel(t){
+  const k=t.kaliteKontrol||{};
+  if(k.durum==='OK')return `Temiz (OK)${k.onaylayan?' · '+k.onaylayan:''}`;
+  if(k.durum==='Temizlik Gerekli')return `Temizlik Gerekli (NOK)${k.onaylayan?' · '+k.onaylayan:''}`;
+  if(k.durum==='Bekliyor')return 'Bekliyor';
+  return '—';
+}
+function kaliteExcelSonucu(t){
+  const k=t.kaliteKontrol||{};
+  if(k.durum==='OK')return 'OK';
+  if(k.durum==='Temizlik Gerekli')return 'NOK';
+  if(k.durum==='Bekliyor')return 'BEKLİYOR';
+  return '—';
+}
+function kaliteExcelDetay(t){
+  const k=t.kaliteKontrol||{};
+  const parts=[];
+  if(k.durum==='OK')parts.push('Ortam Temiz');
+  else if(k.durum==='Temizlik Gerekli')parts.push('Temizlik Gerekli');
+  else if(k.durum==='Bekliyor')parts.push('Onay Bekliyor');
+  if(k.onaylayan)parts.push(k.onaylayan);
+  if(k.zamanStr)parts.push(k.zamanStr);
+  return parts.join(' · ')||'—';
+}
+function renderTickets(){
+  const c=$('ticketContainer');if(!c)return;c.innerHTML='';
+  let list=arizaKayitlari.filter(t=>archiveMode?t.statu==='Tamamlandı':t.statu!=='Tamamlandı');
+  const q=($('ticketSearch')?.value||'').toLocaleUpperCase('tr-TR');
+  const sf=$('statusFilter')?.value||'ALL';
+  if(q)list=list.filter(t=>(t.kayitNo+' '+t.lokasyon+' '+t.bildiren+' '+t.aciklama+' '+(t.ustalar||[]).join(' ')+' '+(t.teknikNot||'')).toLocaleUpperCase('tr-TR').includes(q));
+  if(!archiveMode&&sf!=='ALL')list=list.filter(t=>t.statu===sf);
+  if(!list.length){c.innerHTML='<div class="empty">'+(archiveMode?'Tamamlanan arıza yok.':'Açık arıza yok.')+'</div>';updateCounters();return;}
+  list.forEach(t=>{
+    const card=document.createElement('article');card.className='ticket';card.dataset.status=t.statu;
+    const photos=(t.fotograflar||[]).map((src,i)=>`<img src="${src}" alt="Fotoğraf ${i+1}" onclick="openModal('${src}')">`).join('');
+    const hist=(t.islemGecmisi||[]).map(h=>`<div class="history-item"><strong>${escapeHTML(h.zaman||'')}</strong> · ${escapeHTML(h.eylemYapan||'SİSTEM')} · ${escapeHTML(h.islem||'')}</div>`).join('');
+    const actions=ustaLoggedIn&&!archiveMode?`<div class="actions"><div class="row"><input id="usta-${escapeHTML(t.id)}" class="input" list="ustaHafiza" placeholder="Teknisyen ekle (en az 4 karakter)" oninput="formatUpper(this)" style="flex:1"><button class="btn small" onclick="addTechnician('${escapeHTML(t.id)}')">＋ Ekle</button></div><textarea id="not-${escapeHTML(t.id)}" placeholder="Teknik not / açıklama…"></textarea><div class="row"><button class="btn small" onclick="saveTechnicianNote('${escapeHTML(t.id)}')">Notu Kaydet</button></div><div class="row"><button class="btn small st-islem" onclick="updateTicketStatus('${escapeHTML(t.id)}','İşlemde')">İşlemde</button><button class="btn small st-parca" onclick="updateTicketStatus('${escapeHTML(t.id)}','Parça Bekliyor')">Parça Bekliyor</button><button class="btn small st-servis" onclick="updateTicketStatus('${escapeHTML(t.id)}','Servis Bekliyor')">Servis Bekliyor</button><button class="btn small st-tamam" onclick="updateTicketStatus('${escapeHTML(t.id)}','Tamamlandı')">Tamamla & Kapat</button></div></div>`:'';
+    const archiveAction=ustaLoggedIn&&archiveMode?`<div class="actions"><button class="btn small primary" onclick="reopenTicket('${escapeHTML(t.id)}')">↶ Arızayı Yeniden Aç</button></div>`:'';
+    card.innerHTML=`<div class="ticket-head"><div class="ticket-id"><span class="ticket-title">${escapeHTML(t.lokasyon)}</span><span class="ticket-no">${escapeHTML(t.kayitNo)}</span></div><div class="ticket-state"><span class="badge ${badgeClass(t.statu)}">${escapeHTML(t.statu)}</span>${t.statu!=='Tamamlandı'?`<span class="age">⏱ ${fmtDur((Date.now()-new Date(t.rawDate))/60000)}</span>`:''}</div></div><div class="ticket-info">${escapeHTML(t.aciklama)}</div>${photos?`<div class="photos">${photos}</div>`:''}<div class="meta"><span>Bildiren: <strong>${escapeHTML(t.bildiren)}</strong></span><span>Açılış: ${escapeHTML(t.tarihStr)}</span><span>Teknisyenler: <strong>${escapeHTML((t.ustalar||[]).join(', ')||'Yok')}</strong></span><span>Kalite: <strong>${escapeHTML(kaliteLabel(t))}</strong></span>${t.sureDakika?`<span>Süre: <strong>${t.sureDakika} dk</strong></span>`:''}</div>${hist?`<details class="history"><summary>İşlem geçmişi (${(t.islemGecmisi||[]).length})</summary>${hist}</details>`:''}${actions||archiveAction}`;
+    c.appendChild(card);
+  });
+  updateCounters();
+}
+function renderKalite(){
+  const c=$('kaliteContainer');if(!c)return;c.innerHTML='';
+  const pending=arizaKayitlari.filter(t=>(t.kaliteKontrol?.durum)==='Bekliyor');
+  const badge=$('kaliteBadgeCount');
+  if(badge)badge.textContent=String(pending.length);
+  if(!kaliteLoggedIn){
+    c.innerHTML='<div class="empty">Kalite Kontrol ekranını görüntülemek için kalite şifresiyle giriş yapın.</div>';
+    return;
+  }
+  if(!pending.length){
+    c.innerHTML='<div class="empty">Kalite temizlik onayı bekleyen kayıt yok.</div>';
+    return;
+  }
+  pending.forEach(t=>{
+    const card=document.createElement('article');card.className='ticket';card.dataset.status=t.statu;
+    const hist=(t.islemGecmisi||[]).map(h=>`<div class="history-item"><strong>${escapeHTML(h.zaman||'')}</strong> · ${escapeHTML(h.eylemYapan||'SİSTEM')} · ${escapeHTML(h.islem||'')}</div>`).join('');
+    card.innerHTML=`<div class="ticket-head"><div class="ticket-id"><span class="ticket-title">${escapeHTML(t.lokasyon)}</span><span class="ticket-no">${escapeHTML(t.kayitNo)} · Arıza Durumu: ${escapeHTML(t.statu)}</span></div><div class="ticket-state"><span class="badge">Kalite Onayı Bekliyor</span></div></div><div class="ticket-info">${escapeHTML(t.aciklama)}</div><div class="meta"><span>Bildiren: <strong>${escapeHTML(t.bildiren)}</strong></span><span>Teknisyenler: <strong>${escapeHTML((t.ustalar||[]).join(', ')||'Yok')}</strong></span>${t.teknikNot?`<span>Not: <strong>${escapeHTML(t.teknikNot)}</strong></span>`:''}</div>${hist?`<details class="history"><summary>İşlem geçmişi (${(t.islemGecmisi||[]).length})</summary>${hist}</details>`:''}<div class="actions"><div class="row"><button class="btn success" onclick="setKaliteOnay('${escapeHTML(t.id)}',true)">✓ Ortam Temiz / OK</button><button class="btn danger" onclick="setKaliteOnay('${escapeHTML(t.id)}',false)">✕ Temizlik Gerekli</button></div></div>`;
+    c.appendChild(card);
+  });
+}
+function updateCounters(){
+  const a=arizaKayitlari.filter(t=>t.statu!=='Tamamlandı');
+  const n=s=>a.filter(t=>t.statu===s).length;
+  $('countBekliyor').textContent=n('Bekliyor');
+  $('countIslemde').textContent=n('İşlemde');
+  $('countParca').textContent=n('Parça Bekliyor');
+  $('countServis').textContent=n('Servis Bekliyor');
+  $('countTamam').textContent=arizaKayitlari.filter(t=>t.statu==='Tamamlandı').length;
+  const kp=arizaKayitlari.filter(t=>(t.kaliteKontrol?.durum)==='Bekliyor').length;
+  const badge=$('kaliteBadgeCount');if(badge)badge.textContent=String(kp);
+  const fv=$('statusFilter').value;
+  document.querySelectorAll('#counterGrid .counter').forEach(b=>b.classList.toggle('active',archiveMode?b.dataset.st==='Tamamlandı':b.dataset.st===fv));
+  $('counterGrid').classList.toggle('has-filter',archiveMode||fv!=='ALL');
+}
+function currentActor(){return $('currentActor').value.trim().toLocaleUpperCase('tr-TR');}
+function currentActorFor(id){let actor=currentActor();if(actor.length>=4)return actor;const t=arizaKayitlari.find(x=>String(x.id)===String(id));const previous=t?.ustalar?.[t.ustalar.length-1]||'';if(previous.length>=4){$('currentActor').value=previous;return previous;}return ''; }
+
+async function mutateTicket(id,fn){
+  const t=arizaKayitlari.find(x=>String(x.id)===String(id));
+  if(!t||!t.remoteId)throw new Error('Kayıt bulunamadı.');
+  if(!firebaseDb)throw new Error('Firebase bağlantısı hazır değil.');
+  const ref=firebaseDb.ref('tickets/'+t.remoteId);
+  const result=await ref.transaction(current=>{
+    if(current===null)return;
+    const fresh=normalizeTicket({...current,remoteId:t.remoteId});
+    fn(fresh);
+    fresh.updatedAt=new Date().toISOString();
+    return fresh;
+  });
+  if(!result.committed||!result.snapshot.val())throw new Error('Kayıt güncellenemedi. Başka bir işlemle çakışmış olabilir; tekrar deneyin.');
+  const fresh=normalizeTicket({...result.snapshot.val(),remoteId:t.remoteId});
+  const ix=arizaKayitlari.findIndex(x=>x.remoteId===fresh.remoteId);
+  if(ix>=0)arizaKayitlari[ix]=fresh;else arizaKayitlari.unshift(fresh);
+  rebuildMemories();renderTickets();renderKalite();updateRaporSummary();
+  return fresh;
 }
 
-function renderAll() {
-  populateDatalists();
-  renderTickets();
-  renderKalite();
-  renderPmView();
-  if (!document.getElementById("rapor-section").classList.contains("hidden")) {
-    populateMonthSelect();
-    updateRaporSummary();
+async function addTechnician(id){const input=$('usta-'+id),name=(input?.value||'').trim().toLocaleUpperCase('tr-TR');if(name.length<4){alert('Teknisyen adı en az 4 karakter olmalı.');return;}let actor=currentActor();if(actor.length<4){actor=name;$('currentActor').value=actor;}try{await mutateTicket(id,t=>{if(!t.ustalar.includes(name))t.ustalar.push(name);addHistory(t,actor,`${name} eklendi.`);});if(input)input.value='';}catch(e){alert(e.message);}}
+function addHistory(t,actor,action){t.islemGecmisi.push({rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:actor,islem:action});}
+async function saveTechnicianNote(id){const actor=currentActorFor(id),note=$('not-'+id)?.value.trim()||'';if(actor.length<4||!note){alert('Teknisyen adı ve not zorunludur.');return;}try{await mutateTicket(id,t=>{t.teknikNot=note;addHistory(t,actor,'Not: '+note);if(!t.ustalar.includes(actor))t.ustalar.push(actor);});alert('Kaydedildi.');}catch(e){alert(e.message);}}
+async function updateTicketStatus(id,status){
+  const actor=currentActorFor(id),note=$('not-'+id)?.value.trim()||'';
+  if(actor.length<4){alert('Teknisyen adını girin.');return;}
+  if(status==='Tamamlandı'&&!note){alert('Çözüm açıklaması yazın.');return;}
+  try{
+    const updated=await mutateTicket(id,t=>{
+      const now=new Date();
+      if(status!=='Bekliyor'&&!t.ilkMudahaleTarihi)t.ilkMudahaleTarihi=now.toISOString();
+      t.statu=status;
+      if(note)t.teknikNot=note;
+      if(status==='Tamamlandı'){t.kapanisTarihi=now.toISOString();t.sureDakika=Math.max(1,Math.round((now-new Date(t.rawDate))/60000));}
+      t.kaliteKontrol={durum:'Bekliyor',temizMi:null,zaman:now.toISOString(),zamanStr:now.toLocaleString('tr-TR'),onaylayan:''};
+      addHistory(t,actor,`Durum "${status}" oldu. Kalite kontrol bildirildi.${note?' Not: '+note:''}`);
+      if(!t.ustalar.includes(actor))t.ustalar.push(actor);
+    });
+    const kaliteMesaj=`${updated.kayitNo} · ${updated.lokasyon}\nYeni Durum: ${status}\nTeknisyen: ${actor}${note?'\nNot: '+note:''}`;
+    sendNotification('Kalite Temizlik Kontrolü Gerekli',kaliteMesaj,kaliteNtfyTopic).then(ok=>{if(!ok)console.warn('Kalite ntfy bildirimi gönderilemedi.');});
+    alert('Güncellendi. Kalite kontrol ekranına ve ntfy kanalına bildirim gönderildi.');
+  }catch(e){alert(e.message);}
+}
+async function setKaliteOnay(id,temizMi){
+  if(!kaliteLoggedIn){alert('Kalite şifresi ile giriş yapın.');return;}
+  const actor=($('kaliteActor')?.value||'').trim().toLocaleUpperCase('tr-TR')||'KALİTE';
+  try{
+    await mutateTicket(id,t=>{
+      const now=new Date();
+      t.kaliteKontrol={
+        durum:temizMi?'OK':'Temizlik Gerekli',
+        temizMi,
+        zaman:now.toISOString(),
+        zamanStr:now.toLocaleString('tr-TR'),
+        onaylayan:actor
+      };
+      addHistory(t,actor,temizMi?'Kalite: Ortam temiz / OK verildi.':'Kalite: Temizlik gerekli işaretlendi.');
+    });
+    alert(temizMi?'Ortam temiz (OK) olarak kaydedildi.':'Temizlik gerekli olarak kaydedildi.');
+  }catch(e){alert(e.message);}
+}
+async function reopenTicket(id){const actor=currentActorFor(id);if(actor.length<4){alert('Yeniden açmak için işlemi yapan teknisyen adını girin.');return;}if(!confirm('Bu tamamlanmış arıza yeniden aktif duruma alınsın mı?'))return;try{await mutateTicket(id,t=>{t.statu='Bekliyor';t.kapanisTarihi=null;t.sureDakika=0;addHistory(t,actor,'Tamamlanan arıza yeniden açıldı.');if(!t.ustalar.includes(actor))t.ustalar.push(actor);});switchArchiveTab(false);alert('Arıza yeniden açıldı.');}catch(e){alert(e.message);}}
+
+function openModal(src){$('modalImg').src=src;$('imageModal').classList.remove('hidden')}function closeModal(){$('imageModal').classList.add('hidden');$('modalImg').src='';}
+function monthKey(t){const d=new Date(t.rawDate);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function populateMonthDropdown(){const s=$('aySecimi');if(!s)return;const old=s.value;s.innerHTML='<option value="ALL">Tüm zamanlar</option>';const months=[...new Set(arizaKayitlari.map(monthKey))].sort().reverse();const names=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];months.forEach(k=>{const [y,m]=k.split('-');s.add(new Option(`${y} - ${names[Number(m)-1]}`,k));});if([...s.options].some(o=>o.value===old))s.value=old;}
+function getReportData(){const m=$('aySecimi').value,st=$('reportStatus').value,loc=$('reportLocation').value.trim().toLocaleUpperCase('tr-TR'),rep=$('reportReporter').value.trim().toLocaleUpperCase('tr-TR'),tech=$('reportTechnician').value.trim().toLocaleUpperCase('tr-TR');return arizaKayitlari.filter(t=>(m==='ALL'||monthKey(t)===m)&&(st==='ALL'||t.statu===st)&&(!loc||t.lokasyon.toLocaleUpperCase('tr-TR').includes(loc))&&(!rep||t.bildiren.toLocaleUpperCase('tr-TR').includes(rep))&&(!tech||((t.ustalar||[]).some(x=>x.toLocaleUpperCase('tr-TR').includes(tech))||(t.islemGecmisi||[]).some(h=>(h.eylemYapan||'').toLocaleUpperCase('tr-TR').includes(tech)))));}
+function updateRaporSummary(){const d=getReportData(),done=d.filter(t=>t.statu==='Tamamlandı');$('raporOzet').innerHTML=`<div class="stats"><div class="stat"><span>Filtrelenen</span><strong>${d.length}</strong></div><div class="stat tamam"><span>Tamamlanan</span><strong>${done.length}</strong></div><div class="stat acik"><span>Açık</span><strong>${d.length-done.length}</strong></div></div>`;$('reportPreview').textContent=d.length?`Kayıtlar listeleniyor.`:'Kayıt yok.';}
+
+function applyExcelLayout(ws,headers,rows){
+  ws['!cols']=headers.map((h,colIdx)=>{
+    const maxLen=rows.reduce((acc,r)=>{
+      const val=String(r[h]??'');
+      const longestLine=val.split(/\r?\n/).reduce((m,line)=>Math.max(m,line.length),0);
+      return Math.max(acc,longestLine);
+    },String(h).length);
+    const minW=h==='Açıklama'||h==='Teknik Not'||h==='İşlem / Açıklama'?36:h==='Kalite Temizlik Sonucu'?18:h==='Kalite Onay Detayı'?28:14;
+    const maxW=h==='Açıklama'||h==='Teknik Not'?54:h==='İşlem / Açıklama'?48:36;
+    return {wch:Math.min(maxW,Math.max(minW,maxLen+4))};
+  });
+
+  const rowHeights=[{hpt:26}];
+  rows.forEach(r=>{
+    let maxLines=1;
+    headers.forEach((h,colIdx)=>{
+      const val=String(r[h]??'');
+      const colW=(ws['!cols'][colIdx]?.wch)||18;
+      const usable=Math.max(10,colW-3);
+      const lines=val.split(/\r?\n/).reduce((sum,line)=>sum+Math.max(1,Math.ceil(line.length/usable)),0);
+      if(lines>maxLines)maxLines=lines;
+    });
+    rowHeights.push({hpt:Math.max(22,maxLines*16+6)});
+  });
+  ws['!rows']=rowHeights;
+
+  const range=XLSX.utils.decode_range(ws['!ref']||'A1');
+  for(let R=range.s.r;R<=range.e.r;R++){
+    for(let C=range.s.c;C<=range.e.c;C++){
+      const addr=XLSX.utils.encode_cell({r:R,c:C});
+      if(!ws[addr])continue;
+      ws[addr].s={
+        alignment:{
+          vertical:'center',
+          horizontal:R===0?'center':'left',
+          wrapText:true
+        },
+        font:{
+          name:'Segoe UI',
+          sz:R===0?11:10,
+          bold:R===0||(C===headers.length-2&&R>0)
+        }
+      };
+    }
   }
 }
 
-initFirebase();
+function exportToExcel(){
+  if(typeof XLSX==='undefined'){alert('Excel bileşeni yüklenemedi. İnternet bağlantısını kontrol edip sayfayı yenileyin.');return;}
+  const d=getReportData();
+  if(!d.length){alert('Seçili filtrelere uygun kayıt bulunamadı.');return;}
+  const rows=d.map(t=>({
+    'Kayıt No':t.kayitNo,
+    'Bildirim Tarihi':t.tarihStr,
+    'Lokasyon':t.lokasyon,
+    'Bildiren':t.bildiren,
+    'Açıklama':t.aciklama,
+    'Durum':t.statu,
+    'Teknisyenler':(t.ustalar||[]).join(', ')||'—',
+    'İlk Müdahale':t.ilkMudahaleTarihi?new Date(t.ilkMudahaleTarihi).toLocaleString('tr-TR'):'—',
+    'Kapanış':t.kapanisTarihi?new Date(t.kapanisTarihi).toLocaleString('tr-TR'):'—',
+    'Toplam Süre (dk)':t.sureDakika||0,
+    'Teknik Not':t.teknikNot||'—',
+    'Kalite Temizlik Sonucu':kaliteExcelSonucu(t),
+    'Kalite Onay Detayı':kaliteExcelDetay(t)
+  }));
+  const history=[];
+  d.forEach(t=>(t.islemGecmisi||[]).forEach(h=>history.push({
+    'Kayıt No':t.kayitNo,
+    'Lokasyon':t.lokasyon,
+    'İşlem Tarihi':h.zaman||'',
+    'İşlemi Yapan':h.eylemYapan||'',
+    'İşlem / Açıklama':h.islem||''
+  })));
+  const wb=XLSX.utils.book_new();
+  const ws1Headers=Object.keys(rows[0]);
+  const ws1=XLSX.utils.json_to_sheet(rows,{header:ws1Headers});
+  applyExcelLayout(ws1,ws1Headers,rows);
+
+  const histRows=history.length?history:[{'Kayıt No':'—','Lokasyon':'—','İşlem Tarihi':'—','İşlemi Yapan':'—','İşlem / Açıklama':'Seçili kayıtlar için işlem geçmişi bulunmuyor.'}];
+  const ws2Headers=Object.keys(histRows[0]);
+  const ws2=XLSX.utils.json_to_sheet(histRows,{header:ws2Headers});
+  applyExcelLayout(ws2,ws2Headers,histRows);
+
+  XLSX.utils.book_append_sheet(wb,ws1,'Arızalar');
+  XLSX.utils.book_append_sheet(wb,ws2,'İşlem Geçmişi');
+  XLSX.writeFile(wb,'Ariza_Raporu.xlsx');
+}
+
+document.addEventListener('DOMContentLoaded',async()=>{
+  try{
+    if(ustaLoggedIn){const lockText=$('lockStatusText');if(lockText)lockText.textContent='Bakımcı Oturumu Açık';}
+    if(kaliteLoggedIn){const kLockText=$('kaliteLockStatusText');if(kLockText)kLockText.textContent='Kalite Oturumu Açık';}
+    renderTickets();renderKalite();populateMonthDropdown();updateRaporSummary();updatePanelSoundButton();
+    await initializeFirebase();
+    await startRealtimeListeners();
+  }catch(e){
+    console.error(e);
+    lastSyncError=e.message||String(e);
+    const el=$('connectionStatus');if(el){el.className='statusline err';el.textContent='Başlatma hatası: '+lastSyncError;}
+  }
+});
 </script>
 </body>
 </html>
