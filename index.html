@@ -73,6 +73,24 @@ textarea{resize:vertical;min-height:92px}
 .tab.active{background:var(--bar);color:#fff}
 .searchrow{margin:0 0 12px}
 
+/* planlı bakım checklist */
+.pm-meta-box{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pm-badge{display:inline-block;background:var(--bar);color:#fff;border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:700}
+.pm-item{background:var(--field);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}
+.pm-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.pm-item-text{font-weight:650;font-size:.98rem;flex:1;min-width:220px}
+.pm-choice-group{display:flex;gap:6px;flex-wrap:wrap}
+.pm-choice{border:1px solid #A9B3BA;border-radius:8px;padding:7px 12px;font-size:.84rem;font-weight:750;cursor:pointer;background:#fff;color:var(--ink)}
+.pm-choice.ok.active{background:var(--green);border-color:var(--green);color:#fff}
+.pm-choice.nok.active{background:var(--red);border-color:var(--red);color:#fff}
+.pm-metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.pm-steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin-bottom:14px}
+.pm-step-card{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:8px}
+.pm-step-card strong{display:block;font-size:.82rem;margin-bottom:6px}
+.pm-step-card .row{gap:4px}
+.pm-step-card input{padding:6px 8px;font-size:.85rem}
+.pm-log-card{background:var(--field);border:1px solid var(--line);border-radius:11px;padding:12px;margin-top:10px}
+
 /* arıza kartı */
 .ticket{--s:var(--amber);--t:var(--amber-t);background:var(--t);border:1px solid var(--line);border-left:9px solid var(--s);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
 .ticket[data-status="İşlemde"]{--s:var(--blue);--t:var(--blue-t)}
@@ -125,7 +143,7 @@ textarea{resize:vertical;min-height:92px}
   .card{padding:14px}
   .brand-logo{height:32px;max-width:125px}
   .header h1{font-size:1rem}
-  .nav{width:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+  .nav{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
   .nav .navbtn{min-width:0;min-height:44px;padding:8px 4px;font-size:.78rem;line-height:1.2;text-align:center}
   .counter-grid{grid-template-columns:repeat(3,1fr)}
   .counter strong{font-size:1.75rem}
@@ -147,6 +165,7 @@ textarea{resize:vertical;min-height:92px}
     <div class="nav">
       <button class="navbtn active" data-sec="form-section" onclick="showSection('form-section')">＋ Arıza Bildir</button>
       <button class="navbtn" data-sec="pano-section" onclick="showSection('pano-section')">▤ Bakım Panosu</button>
+      <button class="navbtn" data-sec="pm-section" onclick="showSection('pm-section')">☑ Planlı Bakım</button>
       <button class="navbtn" data-sec="kalite-section" onclick="showSection('kalite-section')">✓ Kalite <span id="kaliteBadgeCount" class="pill-count">0</span></button>
       <button class="navbtn" data-sec="rapor-section" onclick="handleReportNav()">▥ Rapor & Excel</button>
       <button class="navbtn" onclick="openSettings()">⚙ Bağlantı</button>
@@ -172,6 +191,46 @@ textarea{resize:vertical;min-height:92px}
     <div class="tabbar"><button id="activeTab" class="btn tab active" onclick="switchArchiveTab(false)">Aktif Arızalar</button><button id="archiveTab" class="btn tab" onclick="switchArchiveTab(true)">Tamamlananlar</button></div>
     <div class="searchrow"><input id="ticketSearch" class="input" placeholder="Kayıt no, makine veya bildiren ara" oninput="renderTickets()"><input type="hidden" id="statusFilter" value="ALL"></div>
     <div id="ticketContainer"></div>
+  </section>
+
+  <section id="pm-section" class="card hidden">
+    <div class="card-title">
+      <span>Planlı Bakım Kontrol Listesi (QR)</span>
+      <div class="row">
+        <button class="btn small" onclick="copyCurrentPmQrLink()">🔗 QR Linkini Kopyala</button>
+        <button class="btn small" onclick="renderPmHistory()">↻ Kayıtları Yenile</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <label for="pmMachineSelect">Makine / Pano Seçimi (QR kod ile ?pm=KOD parametresiyle doğrudan açılır)</label>
+      <select id="pmMachineSelect" onchange="onPmMachineChange(this.value)"></select>
+    </div>
+
+    <div id="pmMachineInfo" class="pm-meta-box"></div>
+
+    <div class="group">
+      <label for="pmTechnician">Kontrol / Bakım Gerçekleştiren (Ad Soyad)</label>
+      <input id="pmTechnician" class="input" list="ustaHafiza" placeholder="Ad Soyad" oninput="formatUpper(this)">
+    </div>
+
+    <div id="pmMetricsArea"></div>
+    <div id="pmChecklistArea"></div>
+
+    <div class="group">
+      <label for="pmFindings">Tespit Edilen Bulgular / Yapılan İşlemler</label>
+      <textarea id="pmFindings" placeholder="Tespit edilen bulguları, ölçüm notlarını veya yapılan işlemleri yazınız…"></textarea>
+    </div>
+
+    <div class="row">
+      <button id="pmSaveBtn" type="button" class="btn success" onclick="savePmChecklist()">✓ Planlı Bakımı Kaydet</button>
+      <button type="button" class="btn" onclick="resetPmForm()">Temizle</button>
+    </div>
+
+    <div style="margin-top:20px">
+      <div class="card-title" style="font-size:1rem;margin-bottom:8px">Son Planlı Bakım Kayıtları</div>
+      <div id="pmHistoryContainer"><div class="empty">Henüz kayıt bulunmuyor.</div></div>
+    </div>
   </section>
 
   <section id="kalite-section" class="card hidden">
@@ -217,6 +276,219 @@ const FIREBASE_CONFIG = {
   appId: "1:1054966260513:web:10aaae99657642546c1460"
 };
 
+const PM_CHECKLISTS = {
+  "PANO-GENEL": {
+    code: "PANO-GENEL",
+    name: "Ana Pano, Dağıtım Panoları, Tali Panolar ve Aydınlatma Panoları",
+    period: "Aylık",
+    metrics: [],
+    steps15: false,
+    items: [
+      "Pano içi ve dışının uygun yöntemle temizlenmesi, toz, nem ve korozyon kontrolünün yapılması.",
+      "Pano kapak kilitlerinin, kapak contalarının, kablo rakorlarının ve gövde sızdırmazlığının kontrol edilmesi.",
+      "Baralar, şalterler, kontaktörler, termik/kaçak akım röleleri ve klemens bağlantılarında gevşeklik, oksidasyon ve ısınma kontrolünün yapılması.",
+      "Kaçak akım koruma rölelerinin test butonu üzerinden açma fonksiyon testinin yapılması.",
+      "Şalter, kontaktör, sigorta, röle, klemens, buton ve sinyal lambalarının mekanik sağlamlık ile çalışma/algılama durumunun kontrol edilmesi.",
+      "Pano içi soğutma fanları, termostat ve aydınlatma ekipmanlarının çalışmasının kontrol edilmesi.",
+      "Topraklama ve nötr baraları ile kablolarının bağlantı sıkılığının ve sürekliliğinin kontrol edilmesi.",
+      "Dijital ölçüm cihazları, gösterge lambaları, zaman röleleri/kontaktör grupları ve aydınlatma devrelerinin çalışma durumunun kontrol edilmesi.",
+      "Devre etiketlerinin, tek hat/şema bilgilerinin ve pano kapak güvenlik uyarılarının okunaklılık ve bütünlük kontrolünün yapılması."
+    ]
+  },
+  "ITW-DOLUM": {
+    code: "ITW-DOLUM",
+    name: "ITW Dikey Dolum Makinesi",
+    period: "Aylık",
+    metrics: [],
+    steps15: false,
+    items: [
+      "Pnömatik hava hazırlama ünitesinin genel durumunun, basınç ayarının ve filtre grubunun kontrol edilmesi.",
+      "Elektrik panosu içerisinin uygun yöntemle temizlenmesi.",
+      "Kaçak akım koruma rölesinin test butonu üzerinden fonksiyon testinin yapılması.",
+      "Acil stop butonlarının ve emniyet devresinin fonksiyon testinin yapılması.",
+      "Döner tabla referans sensörünün konumunun ve algılama doğruluğunun kontrol edilmesi.",
+      "Döner tabla ve kefeler üzerindeki kablo bağlantılarının titreşim ve darbe kaynaklı gevşeme açısından kontrol edilmesi.",
+      "1, 2, 3 ve 4 numaralı kefelere ait klemens bağlantılarının gevşeklik ve temas güvenilirliği açısından kontrol edilmesi.",
+      "Tüm pnömatik piston sensörlerinin konumlarının ve algılama doğruluğunun kontrol edilmesi.",
+      "Elektrik panosu kapak kilitlerinin ve kilitleme mekanizmalarının kontrol edilmesi.",
+      "Döner tabla üzerindeki elektrik panosu bağlantı civatalarının gevşeklik açısından kontrol edilmesi.",
+      "Elektrik panosu kapak contalarının sızdırmazlık açısından kontrol edilmesi; deformasyon veya sızdırmazlık kaybı tespit edilmesi durumunda değiştirilmesi.",
+      "Elektrik panosu içerisindeki elektriksel bağlantıların gevşeklik, renk değişimi, ısınma izi ve fiziksel hasar açısından gözle kontrol edilmesi.",
+      "Atma kefelerinin referans noktasında olup olmadığının kontrol edilmesi.",
+      "Ürün besleme konveyörü ve seviye sensörünün kontrol edilmesi.",
+      "Multipond kablo girişleri, elektrik hattı, klemens ve kapakların sızdırmazlık kontrolünün yapılması."
+    ]
+  },
+  "ITW-VAKUM": {
+    code: "ITW-VAKUM",
+    name: "ITW Vakum Dedektörü",
+    period: "Aylık",
+    metrics: [],
+    steps15: false,
+    items: [
+      "Kontrol panosu içinin uygun yöntemle temizlenmesi, klemens ve kablo bağlantılarında gevşeklik ve ısınma kontrolünün yapılması.",
+      "Kontrol panosu kapak contalarının, kablo rakorlarının ve gövde sızdırmazlığının kontrol edilmesi.",
+      "Acil stop butonunun fonksiyon testinin yapılması.",
+      "Vakum sensörünün bağlantı, konum ve okuma doğruluğunun kontrol edilmesi.",
+      "Hava hazırlama ünitesinin (FRL) genel durumunun, filtre/su tahliyesinin ve basınç ayar doğruluğunun kontrol edilmesi.",
+      "Pnömatik silindirler, selenoid valfler ve hava hortumlarında kaçak ve konum doğruluğunun kontrol edilmesi.",
+      "Reject bandı motorunun elektrik/bağlantı ve çalışma durumunun, reject alarm sisteminin ve makine HMI ekranının kontrol edilmesi.",
+      "Referans kavanozlarla test çalışması yapılarak vakum algılama, reject ayrıştırma ve reject alarm fonksiyonunun doğrulanması."
+    ]
+  },
+  "JENERATOR": {
+    code: "JENERATOR",
+    name: "Jeneratör 1 ve Jeneratör 2",
+    period: "Aylık",
+    metrics: [
+      { key: "akuVoltaj", label: "Akü Voltajı (V)", placeholder: "Örn: 24.6" },
+      { key: "yakitSeviye", label: "Yakıt Seviyesi (%)", placeholder: "Örn: 80" },
+      { key: "calismaSaati", label: "Çalışma Saati (saat)", placeholder: "Örn: 1240" }
+    ],
+    steps15: false,
+    items: [
+      "Genel görsel kontrol (yağ, yakıt, soğutma suyu kaçağı, gevşeklik vb.)",
+      "Akü şarj redresörü kontrol edildi.",
+      "Motor yağı seviyesi kontrol edildi.",
+      "Soğutma suyu seviyesi kontrol edildi.",
+      "Hava filtresi sökülerek basınçlı hava ile temizlendi.",
+      "Radyatör petekleri basınçlı hava ile temizlendi.",
+      "Kontrol panelinde aktif alarm bulunmuyor.",
+      "Transfer panosu kontrol edildi.",
+      "Jeneratör manuel olarak çalıştırıldı."
+    ]
+  },
+  "KAZAN-DAIRESI": {
+    code: "KAZAN-DAIRESI",
+    name: "Kazan Dairesi",
+    period: "Aylık",
+    metrics: [
+      { key: "buharBasinci", label: "Kazan Buhar Basıncı (bar)", placeholder: "Örn: 6.5" },
+      { key: "calismaSicakligi", label: "Kazan Çalışma Sıcaklığı (°C)", placeholder: "Örn: 165" }
+    ],
+    steps15: false,
+    items: [
+      "Genel görsel kontrol (su, buhar, gaz kaçağı ve gevşeklik vb.)",
+      "Kazan su seviyesi kontrol edildi.",
+      "Kazan kimyasalları kontrol edildi, eksik ise tamamlandı.",
+      "Kimyasal dozaj pompaları kontrol edildi.",
+      "Kimyasal dozaj hatları ve bağlantıları kontrol edildi.",
+      "Pislik tutucu filtreleri temizlendi.",
+      "Conta, vana, kondenstop ve boru hattı genel kontrolü yapıldı.",
+      "Sıcak su pompa hattında pompa, vana, conta, borular ve su kaçağı kontrolü yapıldı.",
+      "Sıcak su pompa hattı basınç göstergelerinin nominal değerlerde olduğu doğrulandı.",
+      "Manometrelerin sağlamlık kontrolü yapıldı",
+      "Sıcak su pompaları test edildi.",
+      "Kazan manuel blöf yapıldı.",
+      "Brülör ve çevresi basınçlı hava ile temizlendi.",
+      "Kontrol panelinde aktif alarm bulunmuyor.",
+      "Sesli alarm sistemi test edildi.",
+      "Kazan ve brülör çevresi temizlendi.",
+      "Baca bağlantıları görsel olarak kontrol edildi.",
+      "Emniyet ventilleri kontrol edildi.",
+      "Gaz hattı ve gaz vanaları genel kontrolü yapıldı.",
+      "Kazan dairesi havalandırma sistemi kontrol edildi.",
+      "Su yumuşatma sistemi kontrol edildi.",
+      "Soğuk su pompa hattı ve pompalar kontrol edildi.",
+      "Hidrofor tankı, hava durumu bağlantılar ve basınç göstergesi kontrol edildi."
+    ]
+  },
+  "KOMPANZASYON": {
+    code: "KOMPANZASYON",
+    name: "Kompanzasyon Panosu",
+    period: "3 Aylık",
+    metrics: [
+      { key: "okunanCosPhi", label: "Okunan COS φ", placeholder: "Örn: 0.99" },
+      { key: "hedefCosPhi", label: "Hedef COS φ", placeholder: "Örn: 1.00" },
+      { key: "alarmAciklama", label: "Alarm Açıklaması (Reaktif Güç Kontrol Rölesi)", placeholder: "Varsa alarm notu" }
+    ],
+    steps15: true,
+    items: [
+      "Pano içi ve dışının uygun yöntemle temizlenmesi, toz, nem ve korozyon kontrolünün yapılması.",
+      "Pano kapak kilitlerinin, kapak contalarının, kablo rakorlarının ve gövde sızdırmazlığının kontrol edilmesi.",
+      "Reaktif güç kontrol rölesinin çalışmasının, alarm/arıza göstergelerinin ve kademe geçişlerinin kontrol edilmesi.",
+      "Kondansatörlerin fiziksel durumunun (şişme, deformasyon, sızıntı, ısınma ve korozyon) kontrol edilmesi.",
+      "Termal kamera ile pano içi ekipman, bara ve bağlantılarda ısınma kontrolünün yapılması."
+    ]
+  },
+  "KOMPRESOR": {
+    code: "KOMPRESOR",
+    name: "Atlas Copco GA30 / GA45 VSD",
+    period: "Aylık",
+    metrics: [
+      { key: "calismaBasinci", label: "Çalışma Basıncı (bar)", placeholder: "Örn: 7.5" },
+      { key: "calismaSaati", label: "Çalışma Saati (saat)", placeholder: "Örn: 4820" }
+    ],
+    steps15: false,
+    items: [
+      "Genel görsel kontrol (yağ kaçağı, hava kaçağı, gevşeklik vb.)",
+      "Kompresör yağ seviyesi kontrol edildi.",
+      "Hava filtresi sökülerek basınçlı hava ile temizlendi.",
+      "Kompresör dış yüzeyi ve kabin içi basınçlı hava ile temizlendi.",
+      "Soğutucu petekleri basınçlı hava ile temizlendi.",
+      "Elektrik panosu kontrol edildi. Basınçlı hava ile temizlendi.",
+      "Kontrol panelinde aktif alarm bulunmuyor.",
+      "Kondens tahliye sistemi kontrol edildi.",
+      "Su separatör filtreleri kontrol edildi.",
+      "Kompresör dairesi temizlendi."
+    ]
+  },
+  "LANGGUTH": {
+    code: "LANGGUTH",
+    name: "Langguth Islak ve Kuru Etiketleme Makinesi",
+    period: "Aylık",
+    metrics: [],
+    steps15: false,
+    items: [
+      "Elektrik panosu içinin uygun yöntemle temizlenmesi, klemens ve kablo bağlantılarında gevşeklik/ısınma kontrolü.",
+      "Kaçak akım koruma rölesinin test butonu üzerinden fonksiyon testinin yapılması.",
+      "Acil stop butonlarının ve kapı emniyet sviçlerinin emniyet devresi üzerinden fonksiyon testinin yapılması.",
+      "PLC, HMI operatör paneli ve sürücülerin (VFD) aktif alarm ve haberleşme durumlarının kontrol edilmesi.",
+      "Ürün algılama, etiket başlangıç/boşluk/kopma ve magazin seviye sensörlerinin sağlamlık, temizlik ve konum doğruluğunun kontrol edilmesi.",
+      "Etiket besleme / aktarma ve vakum ünitesi motor/sürücü ve sensör bağlantılarının kontrol edilmesi.",
+      "Pnömatik hava hazırlama ünitesinin (FRL) genel durumunun, filtre/su tahliyesinin ve basınç ayar doğruluğunun kontrol edilmesi.",
+      "Pnömatik silindirler, manyetik piston sensörleri, selenoid valf blokları ve hava hortumlarında kaçak ve konum doğruluğunun kontrol edilmesi.",
+      "Makine geneli kablo rakorları, sensör/valf kabloları ve topraklama sürekliliğinin kontrol edilmesi."
+    ]
+  },
+  "MARMAK-VAKUM": {
+    code: "MARMAK-VAKUM",
+    name: "Marmak Vakum Dedektörü",
+    period: "Aylık",
+    metrics: [],
+    steps15: false,
+    items: [
+      "Kontrol panosu içinin uygun yöntemle temizlenmesi, klemens ve kablo bağlantılarında gevşeklik ve ısınma kontrolünün yapılması.",
+      "Kontrol panosu kapak contalarının, kablo rakorlarının ve gövde sızdırmazlığının kontrol edilmesi.",
+      "Acil stop butonunun fonksiyon testinin yapılması.",
+      "Vakum sensörünün bağlantı, konum ve okuma doğruluğunun kontrol edilmesi.",
+      "Hava hazırlama ünitesinin (FRL) genel durumunun, filtre/su tahliyesinin ve basınç ayar doğruluğunun kontrol edilmesi.",
+      "Pnömatik silindirler, selenoid valfler ve hava hortumlarında kaçak ve konum doğruluğunun kontrol edilmesi.",
+      "Reject bandı motorunun elektrik/bağlantı ve çalışma durumunun, reject alarm sisteminin ve makine HMI ekranının kontrol edilmesi.",
+      "Referans kavanozlarla test çalışması yapılarak vakum algılama, reject ayrıştırma ve reject alarm fonksiyonunun doğrulanması."
+    ]
+  },
+  "MAURER-NORDSON": {
+    code: "MAURER-NORDSON",
+    name: "Maurer Koli Makinesi / Nordson",
+    period: "Aylık",
+    metrics: [],
+    steps15: false,
+    items: [
+      "Tüm sensörlerin sağlamlık kontrolünün yapılması.",
+      "Sensör pozisyonlarının doğruluk kontrolünün yapılması.",
+      "Kapı emniyet sviçlerinin kontrol edilmesi.",
+      "Nordson ısıtıcı, hortum ve blok kablo bağlantılarının kontrol edilmesi.",
+      "Elektrik panosu içinin basınçlı hava ile temizlenmesi.",
+      "Hava hazırlama ünitesinin kontrol edilmesi.",
+      "Basınç doğruluğu kontrolünün yapılması.",
+      "Hava kaçak kontrolünün yapılması.",
+      "Makine geneli ve pano içi kablo bağlantılarının gevşeklik kontrolünün yapılması.",
+      "Acil stop sisteminin kontrol edilmesi."
+    ]
+  }
+};
+
 let firebaseApp = null;
 let firebaseDb = null;
 let firebaseReady = false;
@@ -238,6 +510,8 @@ let hafizaLokasyonlar=[];
 let hafizaBildirenler=[];
 let hafizaUstalar=[];
 let tempPhotos=[null,null];
+let currentPmCode="ITW-DOLUM";
+let pmItemStates={};
 const USTA_LOGIN_STORAGE_KEY='arizaBakimOturumu';
 const KALITE_LOGIN_STORAGE_KEY='arizaKaliteOturumu';
 function readRememberedLogin(key){try{return localStorage.getItem(key)==='1';}catch(e){return false;}}
@@ -260,6 +534,10 @@ const KALITE_NTFY_TOPIC='burakcan-kalite';
 let ntfyTopic=NTFY_TOPIC;
 let kaliteNtfyTopic=KALITE_NTFY_TOPIC;
 const $=id=>document.getElementById(id);
+
+function isPmRecord(t){return t&&t.tip==='PLANLI_BAKIM';}
+function getFaultTickets(){return arizaKayitlari.filter(t=>!isPmRecord(t));}
+function getPmRecords(){return arizaKayitlari.filter(t=>isPmRecord(t));}
 
 function firebaseConfigIsReady(){
   const values=['apiKey','authDomain','databaseURL','projectId','appId'];
@@ -452,9 +730,10 @@ function showSection(id){
     $('kaliteLockStatusText').textContent='Kalite Oturumu Açık';
   }
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.sec===id));
-  ['form-section','pano-section','kalite-section','rapor-section'].forEach(x=>$(x).classList.add('hidden'));
+  ['form-section','pano-section','pm-section','kalite-section','rapor-section'].forEach(x=>$(x).classList.add('hidden'));
   $(id).classList.remove('hidden');
   if(id==='pano-section'){renderTickets();syncIncremental(false);}
+  if(id==='pm-section'){renderPmChecklist();renderPmHistory();syncIncremental(false);}
   if(id==='kalite-section'){renderKalite();syncIncremental(false);}
   if(id==='rapor-section'){populateMonthDropdown();updateRaporSummary();syncIncremental(false);}
   return true;
@@ -471,6 +750,190 @@ function openSettings(){
 async function copyTopicValue(val){try{await navigator.clipboard.writeText(val);alert('Kanal adı kopyalandı: '+val);}catch(e){prompt('Bildirim kanalı:',val);}}
 function closeSettings(){$('settingsModal').classList.add('hidden');}
 
+/* PLANLI BAKIM & QR KOD MODÜLÜ */
+function initPmSelector(){
+  const sel=$('pmMachineSelect');
+  if(!sel)return;
+  sel.innerHTML=Object.values(PM_CHECKLISTS).map(m=>`<option value="${escapeHTML(m.code)}">${escapeHTML(m.code)} — ${escapeHTML(m.name)} (${escapeHTML(m.period)})</option>`).join('');
+  sel.value=currentPmCode;
+}
+function onPmMachineChange(code){
+  if(!PM_CHECKLISTS[code])code="ITW-DOLUM";
+  currentPmCode=code;
+  pmItemStates={};
+  if($('pmMachineSelect'))$('pmMachineSelect').value=code;
+  renderPmChecklist();
+  renderPmHistory();
+}
+function getPmQrUrl(code){
+  const base=location.href.split('?')[0].split('#')[0];
+  return `${base}?pm=${encodeURIComponent(code)}`;
+}
+async function copyCurrentPmQrLink(){
+  const url=getPmQrUrl(currentPmCode);
+  try{await navigator.clipboard.writeText(url);alert('QR Bağlantısı kopyalandı:\n'+url);}
+  catch(e){prompt('QR Bağlantısı:',url);}
+}
+function renderPmChecklist(){
+  const m=PM_CHECKLISTS[currentPmCode]||PM_CHECKLISTS["ITW-DOLUM"];
+  const info=$('pmMachineInfo');
+  if(info){
+    info.innerHTML=`<div><strong>${escapeHTML(m.name)}</strong><div class="muted">QR Kodu: <code>?pm=${escapeHTML(m.code)}</code> · Bağlantı: ${escapeHTML(getPmQrUrl(m.code))}</div></div><span class="pm-badge">Periyot: ${escapeHTML(m.period)}</span>`;
+  }
+  const metricsArea=$('pmMetricsArea');
+  if(metricsArea){
+    let html='';
+    if(Array.isArray(m.metrics)&&m.metrics.length){
+      html+=`<div class="pm-metrics-grid">`+m.metrics.map(mt=>`<div class="group" style="margin-bottom:0"><label for="pm-metric-${escapeHTML(mt.key)}">${escapeHTML(mt.label)}</label><input id="pm-metric-${escapeHTML(mt.key)}" class="input" placeholder="${escapeHTML(mt.placeholder||'')}"></div>`).join('')+`</div>`;
+    }
+    if(m.steps15){
+      const stepCards=Array.from({length:15},(_,idx)=>{
+        const k=idx+1;
+        return `<div class="pm-step-card"><strong>Kademe ${k} (A)</strong><div class="row"><input id="pm-st-${k}-r" class="input" placeholder="R"><input id="pm-st-${k}-s" class="input" placeholder="S"><input id="pm-st-${k}-t" class="input" placeholder="T"></div></div>`;
+      }).join('');
+      html+=`<div class="group" style="margin-top:12px;margin-bottom:0"><label>15 Kademe R / S / T Akım Değerleri (A)</label><div class="pm-steps-grid">${stepCards}</div></div>`;
+    }
+    metricsArea.innerHTML=html;
+  }
+  const listArea=$('pmChecklistArea');
+  if(!listArea)return;
+  listArea.innerHTML=m.items.map((text,idx)=>{
+    const state=pmItemStates[idx]||'';
+    return `<div class="pm-item"><div class="pm-item-top"><div class="pm-item-text">${idx+1}. ${escapeHTML(text)}</div><div class="pm-choice-group"><button type="button" class="pm-choice ok ${state==='OK'?'active':''}" onclick="setPmItemState(${idx},'OK')">✓ OK</button><button type="button" class="pm-choice nok ${state==='NOK'?'active':''}" onclick="setPmItemState(${idx},'NOK')">✕ NOK</button>${state==='NOK'?`<button type="button" class="btn small danger" onclick="openFaultFromPm(${idx})">⚠ Arıza Aç</button>`:''}</div></div></div>`;
+  }).join('');
+}
+function setPmItemState(idx,val){
+  pmItemStates[idx]=pmItemStates[idx]===val?'':val;
+  renderPmChecklist();
+}
+function openFaultFromPm(idx){
+  const m=PM_CHECKLISTS[currentPmCode]||PM_CHECKLISTS["ITW-DOLUM"];
+  const itemText=m.items[idx]||'Kontrol maddesi';
+  const tech=($('pmTechnician')?.value||'').trim().toLocaleUpperCase('tr-TR');
+  const findings=($('pmFindings')?.value||'').trim();
+  showSection('form-section');
+  if($('lokasyonInput'))$('lokasyonInput').value=`${m.name} (${m.code})`;
+  if(tech&&$('bildirenInput'))$('bildirenInput').value=tech;
+  if($('aciklamaInput'))$('aciklamaInput').value=`[Planlı Bakım - ${m.period} - NOK] ${itemText}${findings?'\nNot: '+findings:''}`;
+  if($('aciklamaInput'))$('aciklamaInput').focus();
+}
+function resetPmForm(){
+  pmItemStates={};
+  if($('pmFindings'))$('pmFindings').value='';
+  renderPmChecklist();
+}
+async function savePmChecklist(){
+  const m=PM_CHECKLISTS[currentPmCode]||PM_CHECKLISTS["ITW-DOLUM"];
+  const tech=($('pmTechnician')?.value||'').trim().toLocaleUpperCase('tr-TR');
+  const findings=($('pmFindings')?.value||'').trim();
+  if(tech.length<4){alert('Lütfen kontrol/bakım gerçekleştiren kişinin adını (en az 4 karakter) girin.');return;}
+  const unanswered=[];
+  const nokItems=[];
+  const maddeSonuclari=m.items.map((text,idx)=>{
+    const st=pmItemStates[idx]||'';
+    if(!st)unanswered.push(idx+1);
+    if(st==='NOK')nokItems.push(`${idx+1}. ${text}`);
+    return {no:idx+1,madde:text,durum:st||'OK'};
+  });
+  if(unanswered.length){
+    alert(`Lütfen şu maddeler için OK veya NOK seçin: ${unanswered.join(', ')}`);
+    return;
+  }
+  const metrics={};
+  (m.metrics||[]).forEach(mt=>{
+    const el=$('pm-metric-'+mt.key);
+    if(el&&el.value.trim())metrics[mt.label]=el.value.trim();
+  });
+  let steps15Data=[];
+  if(m.steps15){
+    for(let k=1;k<=15;k++){
+      const r=($(`pm-st-${k}-r`)?.value||'').trim();
+      const s=($(`pm-st-${k}-s`)?.value||'').trim();
+      const t=($(`pm-st-${k}-t`)?.value||'').trim();
+      if(r||s||t)steps15Data.push({kademe:k,R:r,S:s,T:t});
+    }
+  }
+  const btn=$('pmSaveBtn');
+  if(btn){btn.disabled=true;btn.textContent='Kaydediliyor…';}
+  try{
+    const now=new Date();
+    const metricLines=Object.entries(metrics).map(([k,v])=>`${k}: ${v}`);
+    const descParts=[
+      `Periyot: ${m.period} · Kontrol Eden: ${tech} · Sonuç: ${nokItems.length?nokItems.length+' NOK':'Tümü OK'}`,
+      metricLines.length?'Ölçümler: '+metricLines.join(' | '):'',
+      nokItems.length?'NOK Maddeler:\n'+nokItems.join('\n'):'',
+      findings?'Bulgular / İşlemler: '+findings:''
+    ].filter(Boolean);
+
+    const pmTicket={
+      id:'PM-'+Date.now()+'-'+Math.floor(Math.random()*10000),
+      tip:'PLANLI_BAKIM',
+      pmCode:m.code,
+      pmName:m.name,
+      pmPeriod:m.period,
+      pmTechnician:tech,
+      pmFindings:findings,
+      pmMetrics:metrics,
+      pmSteps15:steps15Data,
+      pmNokCount:nokItems.length,
+      pmNokItems:nokItems,
+      pmItems:maddeSonuclari,
+      kayitNo:'PM-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),
+      tarihStr:now.toLocaleString('tr-TR'),
+      rawDate:now.toISOString(),
+      lokasyon:`${m.name} (${m.code})`,
+      bildiren:tech,
+      aciklama:descParts.join('\n'),
+      fotograflar:[],
+      statu:'Tamamlandı',
+      ustalar:[tech],
+      teknikNot:findings||(nokItems.length?nokItems.join(' / '):'Tüm maddeler OK'),
+      ilkMudahaleTarihi:now.toISOString(),
+      kapanisTarihi:now.toISOString(),
+      sureDakika:0,
+      kaliteKontrol:{durum:'Yok',temizMi:null,zaman:null,zamanStr:'',onaylayan:''},
+      islemGecmisi:[{rawTime:now.toISOString(),zaman:now.toLocaleString('tr-TR'),eylemYapan:tech,islem:`Planlı bakım (${m.period}) kaydedildi. ${nokItems.length?nokItems.length+' NOK madde var.':'Tümü OK.'}`}]
+    };
+
+    await createRemoteTicket(pmTicket,false);
+    upsertLocalTicket(pmTicket.remoteId,pmTicket,false);
+    renderPmHistory();
+    if(nokItems.length){
+      sendNotification(`Planlı Bakım NOK · ${m.code}`,`${m.name} (${m.period})\nKontrol Eden: ${tech}\nNOK Madde Sayısı: ${nokItems.length}\n${nokItems.join('\n')}`,NTFY_TOPIC).catch(()=>{});
+      if(confirm(`${nokItems.length} adet NOK madde kaydedildi. Bu bulgular için ayrı bir arıza bildirimi açmak ister misiniz?`)){
+        showSection('form-section');
+        if($('lokasyonInput'))$('lokasyonInput').value=`${m.name} (${m.code})`;
+        if($('bildirenInput'))$('bildirenInput').value=tech;
+        if($('aciklamaInput'))$('aciklamaInput').value=`[Planlı Bakım - ${m.period} - ${nokItems.length} NOK]\n`+nokItems.join('\n')+(findings?`\nBulgular: ${findings}`:'');
+      }
+    }else{
+      alert(`${m.name} planlı bakım kaydı kaydedildi.`);
+    }
+    resetPmForm();
+  }catch(err){
+    alert('Planlı bakım kaydedilemedi: '+err.message);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='✓ Planlı Bakımı Kaydet';}
+  }
+}
+function renderPmHistory(){
+  const container=$('pmHistoryContainer');
+  if(!container)return;
+  const filtered=getPmRecords().filter(x=>x.pmCode===currentPmCode).slice(0,8);
+  if(!filtered.length){
+    container.innerHTML=`<div class="empty">${escapeHTML(currentPmCode)} için henüz kayıtlı planlı bakım bulunmuyor.</div>`;
+    return;
+  }
+  container.innerHTML=filtered.map(r=>{
+    const nokCount=Number(r.pmNokCount||0);
+    const nokBadge=nokCount>0?`<span class="badge" style="background:var(--red);color:#fff">${nokCount} NOK</span>`:`<span class="badge" style="background:var(--green);color:#fff">Tümü OK</span>`;
+    const mObj=r.pmMetrics||{};
+    const mStr=Object.keys(mObj).length?`<div class="muted" style="margin-top:4px">Ölçümler: ${escapeHTML(Object.entries(mObj).map(([k,v])=>`${k}: ${v}`).join(' · '))}</div>`:'';
+    const fStr=r.pmFindings?`<div class="muted" style="margin-top:4px">Not: ${escapeHTML(r.pmFindings)}</div>`:'';
+    return `<div class="pm-log-card"><div class="ticket-head"><div><strong>${escapeHTML(r.tarihStr||'')}</strong> · <strong>${escapeHTML(r.pmTechnician||r.bildiren||'')}</strong></div>${nokBadge}</div>${mStr}${fStr}</div>`;
+  }).join('');
+}
+
 async function reserveTicketNumber(){
   if(!firebaseDb)throw new Error('Firebase bağlantısı hazır değil.');
   const year=new Date().getFullYear();
@@ -479,13 +942,13 @@ async function reserveTicketNumber(){
   if(!result.committed)throw new Error('Kayıt numarası ayrılamadı.');
   return 'ARZ-'+year+'-'+String(result.snapshot.val()).padStart(4,'0');
 }
-async function createRemoteTicket(ticket){
+async function createRemoteTicket(ticket,assignFaultNo=true){
   if(!firebaseDb)throw new Error('Firebase bağlantısı hazır değil.');
   if(!firebaseAuthReady||!firebase.auth().currentUser)throw new Error('Firebase anonim oturumu henüz hazır değil.');
   const newRef=firebaseDb.ref('tickets').push();
   ticket.remoteId=newRef.key;
   ticket.id=ticket.id||newRef.key;
-  ticket.kayitNo=await reserveTicketNumber();
+  if(assignFaultNo)ticket.kayitNo=await reserveTicketNumber();
   ticket.updatedAt=new Date().toISOString();
   await newRef.set(ticket);
   const verification=await newRef.once('value');
@@ -515,7 +978,7 @@ function normalizeTicket(t){
 }
 function rebuildMemories(){const loc=new Set(),rep=new Set(),tech=new Set();arizaKayitlari.forEach(t=>{if(t.lokasyon)loc.add(t.lokasyon);if(t.bildiren)rep.add(t.bildiren);(t.ustalar||[]).forEach(x=>tech.add(x));(t.islemGecmisi||[]).forEach(x=>{if(x.eylemYapan)tech.add(x.eylemYapan)});});hafizaLokasyonlar=[...loc].sort();hafizaBildirenler=[...rep].sort();hafizaUstalar=[...tech].sort();fillDatalist('lokasyonHafiza',hafizaLokasyonlar);fillDatalist('bildirenHafiza',hafizaBildirenler);fillDatalist('ustaHafiza',hafizaUstalar);}
 function fillDatalist(id,items){const el=$(id);if(!el)return;el.innerHTML=items.map(x=>`<option value="${escapeHTML(x)}"></option>`).join('');}
-function renderKeep(){const keep={};document.querySelectorAll('#ticketContainer textarea,#ticketContainer input').forEach(e=>{if(e.id&&e.value)keep[e.id]=e.value;});renderTickets();renderKalite();Object.entries(keep).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v;});}
+function renderKeep(){const keep={};document.querySelectorAll('#ticketContainer textarea,#ticketContainer input').forEach(e=>{if(e.id&&e.value)keep[e.id]=e.value;});renderTickets();renderKalite();renderPmHistory();Object.entries(keep).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v;});}
 function upsertLocalTicket(key,value,fromLive=false){
   if(!value)return;
   const ticket=normalizeTicket({...value,remoteId:key});
@@ -525,7 +988,7 @@ function upsertLocalTicket(key,value,fromLive=false){
   arizaKayitlari.sort((a,b)=>new Date(b.rawDate)-new Date(a.rawDate));
   rebuildMemories();renderKeep();populateMonthDropdown();updateRaporSummary();
   lastSyncAt=new Date();statusText();
-  if(fromLive&&isNew&&initialSyncComplete&&!$('pano-section').classList.contains('hidden'))playNewFaultSound();
+  if(fromLive&&isNew&&!isPmRecord(ticket)&&initialSyncComplete&&!$('pano-section').classList.contains('hidden'))playNewFaultSound();
 }
 function startRealtimeListeners(){
   if(realtimeListenersStarted||!firebaseDb)return realtimeStartPromise||Promise.resolve();
@@ -572,7 +1035,7 @@ async function syncIncremental(full=false){
   }catch(e){lastSyncError=e.message||String(e);statusText();return false;}
   finally{syncBusy=false;}
 }
-async function syncAll(showMessage=true){const ok=await syncIncremental(true);if(showMessage)alert(ok?`Veriler güncel (${arizaKayitlari.length} arıza).`:'Eşitleme yapılamadı: '+lastSyncError);}
+async function syncAll(showMessage=true){const ok=await syncIncremental(true);if(showMessage)alert(ok?`Veriler güncel (${getFaultTickets().length} arıza).`:'Eşitleme yapılamadı: '+lastSyncError);}
 
 async function compressImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('Fotoğraf okunamadı.'));reader.onload=e=>{const img=new Image();img.onerror=()=>reject(new Error('Fotoğraf açılamadı.'));img.onload=()=>{let max=800;const qualities=[.72,.62,.52,.42,.34];let result='';for(let pass=0;pass<8;pass++){const scale=Math.min(1,max/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);for(const q of qualities){result=canvas.toDataURL('image/jpeg',q);if(result.length<=18000){resolve(result);return;}}max=Math.round(max*.78);}if(result.length>18000){reject(new Error('Fotoğraf yeterince küçültülemedi. Daha küçük bir fotoğraf seçin.'));return;}resolve(result);};img.src=e.target.result;};reader.readAsDataURL(file);});}
 function triggerPhotoUpload(i){$('photo'+i).click();}
@@ -589,7 +1052,7 @@ async function handleFormSubmit(e){
     if(bildiren.length<4)throw new Error('Bildiren kişi adı en az 4 karakter olmalı.');
     if(!lokasyon||!aciklama)throw new Error('Lokasyon ve açıklama zorunludur.');
     const ticket={id:Date.now()+'-'+Math.floor(Math.random()*10000),kayitNo:'ARZ-ATANIYOR',tarihStr:new Date().toLocaleString('tr-TR'),rawDate:new Date().toISOString(),lokasyon,bildiren,aciklama,fotograflar:tempPhotos.filter(Boolean),statu:'Bekliyor',ustalar:[],teknikNot:'',ilkMudahaleTarihi:null,kapanisTarihi:null,sureDakika:0,kaliteKontrol:{durum:'Yok',temizMi:null,zaman:null,zamanStr:'',onaylayan:''},islemGecmisi:[{rawTime:new Date().toISOString(),zaman:new Date().toLocaleString('tr-TR'),eylemYapan:'SİSTEM',islem:'Arıza bildirildi.'}]};
-    await createRemoteTicket(ticket);
+    await createRemoteTicket(ticket,true);
     sendNotification('Yeni arıza bildirimi',ticket.kayitNo+' · '+ticket.lokasyon+' · '+ticket.bildiren+'\n'+ticket.aciklama,NTFY_TOPIC).then(ok=>{if(!ok)console.warn('Yeni arıza bildirimi gönderilemedi.');});
     upsertLocalTicket(ticket.remoteId,ticket,false);
     rebuildMemories();
@@ -667,7 +1130,8 @@ function kaliteExcelDetay(t){
 }
 function renderTickets(){
   const c=$('ticketContainer');if(!c)return;c.innerHTML='';
-  let list=arizaKayitlari.filter(t=>archiveMode?t.statu==='Tamamlandı':t.statu!=='Tamamlandı');
+  const faults=getFaultTickets();
+  let list=faults.filter(t=>archiveMode?t.statu==='Tamamlandı':t.statu!=='Tamamlandı');
   const q=($('ticketSearch')?.value||'').toLocaleUpperCase('tr-TR');
   const sf=$('statusFilter')?.value||'ALL';
   if(q)list=list.filter(t=>(t.kayitNo+' '+t.lokasyon+' '+t.bildiren+' '+t.aciklama+' '+(t.ustalar||[]).join(' ')+' '+(t.teknikNot||'')).toLocaleUpperCase('tr-TR').includes(q));
@@ -686,7 +1150,8 @@ function renderTickets(){
 }
 function renderKalite(){
   const c=$('kaliteContainer');if(!c)return;c.innerHTML='';
-  const pending=arizaKayitlari.filter(t=>(t.kaliteKontrol?.durum)==='Bekliyor');
+  const faults=getFaultTickets();
+  const pending=faults.filter(t=>(t.kaliteKontrol?.durum)==='Bekliyor');
   const badge=$('kaliteBadgeCount');
   if(badge)badge.textContent=String(pending.length);
   if(!kaliteLoggedIn){
@@ -705,14 +1170,15 @@ function renderKalite(){
   });
 }
 function updateCounters(){
-  const a=arizaKayitlari.filter(t=>t.statu!=='Tamamlandı');
+  const faults=getFaultTickets();
+  const a=faults.filter(t=>t.statu!=='Tamamlandı');
   const n=s=>a.filter(t=>t.statu===s).length;
   $('countBekliyor').textContent=n('Bekliyor');
   $('countIslemde').textContent=n('İşlemde');
   $('countParca').textContent=n('Parça Bekliyor');
   $('countServis').textContent=n('Servis Bekliyor');
-  $('countTamam').textContent=arizaKayitlari.filter(t=>t.statu==='Tamamlandı').length;
-  const kp=arizaKayitlari.filter(t=>(t.kaliteKontrol?.durum)==='Bekliyor').length;
+  $('countTamam').textContent=faults.filter(t=>t.statu==='Tamamlandı').length;
+  const kp=faults.filter(t=>(t.kaliteKontrol?.durum)==='Bekliyor').length;
   const badge=$('kaliteBadgeCount');if(badge)badge.textContent=String(kp);
   const fv=$('statusFilter').value;
   document.querySelectorAll('#counterGrid .counter').forEach(b=>b.classList.toggle('active',archiveMode?b.dataset.st==='Tamamlandı':b.dataset.st===fv));
@@ -786,8 +1252,8 @@ async function reopenTicket(id){const actor=currentActorFor(id);if(actor.length<
 
 function openModal(src){$('modalImg').src=src;$('imageModal').classList.remove('hidden')}function closeModal(){$('imageModal').classList.add('hidden');$('modalImg').src='';}
 function monthKey(t){const d=new Date(t.rawDate);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function populateMonthDropdown(){const s=$('aySecimi');if(!s)return;const old=s.value;s.innerHTML='<option value="ALL">Tüm zamanlar</option>';const months=[...new Set(arizaKayitlari.map(monthKey))].sort().reverse();const names=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];months.forEach(k=>{const [y,m]=k.split('-');s.add(new Option(`${y} - ${names[Number(m)-1]}`,k));});if([...s.options].some(o=>o.value===old))s.value=old;}
-function getReportData(){const m=$('aySecimi').value,st=$('reportStatus').value,loc=$('reportLocation').value.trim().toLocaleUpperCase('tr-TR'),rep=$('reportReporter').value.trim().toLocaleUpperCase('tr-TR'),tech=$('reportTechnician').value.trim().toLocaleUpperCase('tr-TR');return arizaKayitlari.filter(t=>(m==='ALL'||monthKey(t)===m)&&(st==='ALL'||t.statu===st)&&(!loc||t.lokasyon.toLocaleUpperCase('tr-TR').includes(loc))&&(!rep||t.bildiren.toLocaleUpperCase('tr-TR').includes(rep))&&(!tech||((t.ustalar||[]).some(x=>x.toLocaleUpperCase('tr-TR').includes(tech))||(t.islemGecmisi||[]).some(h=>(h.eylemYapan||'').toLocaleUpperCase('tr-TR').includes(tech)))));}
+function populateMonthDropdown(){const s=$('aySecimi');if(!s)return;const old=s.value;s.innerHTML='<option value="ALL">Tüm zamanlar</option>';const months=[...new Set(getFaultTickets().map(monthKey))].sort().reverse();const names=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];months.forEach(k=>{const [y,m]=k.split('-');s.add(new Option(`${y} - ${names[Number(m)-1]}`,k));});if([...s.options].some(o=>o.value===old))s.value=old;}
+function getReportData(){const m=$('aySecimi').value,st=$('reportStatus').value,loc=$('reportLocation').value.trim().toLocaleUpperCase('tr-TR'),rep=$('reportReporter').value.trim().toLocaleUpperCase('tr-TR'),tech=$('reportTechnician').value.trim().toLocaleUpperCase('tr-TR');return getFaultTickets().filter(t=>(m==='ALL'||monthKey(t)===m)&&(st==='ALL'||t.statu===st)&&(!loc||t.lokasyon.toLocaleUpperCase('tr-TR').includes(loc))&&(!rep||t.bildiren.toLocaleUpperCase('tr-TR').includes(rep))&&(!tech||((t.ustalar||[]).some(x=>x.toLocaleUpperCase('tr-TR').includes(tech))||(t.islemGecmisi||[]).some(h=>(h.eylemYapan||'').toLocaleUpperCase('tr-TR').includes(tech)))));}
 function updateRaporSummary(){const d=getReportData(),done=d.filter(t=>t.statu==='Tamamlandı');$('raporOzet').innerHTML=`<div class="stats"><div class="stat"><span>Filtrelenen</span><strong>${d.length}</strong></div><div class="stat tamam"><span>Tamamlanan</span><strong>${done.length}</strong></div><div class="stat acik"><span>Açık</span><strong>${d.length-done.length}</strong></div></div>`;$('reportPreview').textContent=d.length?`Kayıtlar listeleniyor.`:'Kayıt yok.';}
 
 function applyExcelLayout(ws,headers,rows){
@@ -883,9 +1349,23 @@ document.addEventListener('DOMContentLoaded',async()=>{
   try{
     if(ustaLoggedIn){const lockText=$('lockStatusText');if(lockText)lockText.textContent='Bakımcı Oturumu Açık';}
     if(kaliteLoggedIn){const kLockText=$('kaliteLockStatusText');if(kLockText)kLockText.textContent='Kalite Oturumu Açık';}
+    initPmSelector();
+    renderPmChecklist();
+    renderPmHistory();
     renderTickets();renderKalite();populateMonthDropdown();updateRaporSummary();updatePanelSoundButton();
+
+    const params=new URLSearchParams(location.search);
+    const pmParam=(params.get('pm')||'').trim().toUpperCase();
+    if(pmParam&&PM_CHECKLISTS[pmParam]){
+      onPmMachineChange(pmParam);
+      ['form-section','pano-section','pm-section','kalite-section','rapor-section'].forEach(x=>$(x).classList.add('hidden'));
+      $('pm-section').classList.remove('hidden');
+      document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.sec==='pm-section'));
+    }
+
     await initializeFirebase();
     await startRealtimeListeners();
+    renderPmHistory();
   }catch(e){
     console.error(e);
     lastSyncError=e.message||String(e);
