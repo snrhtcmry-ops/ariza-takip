@@ -211,7 +211,7 @@ textarea{resize:vertical;min-height:92px}
       <span>Planlı Bakım</span>
       <div class="row">
         <button class="btn small" onclick="copyCurrentPmQrLink()">🔗 QR Linkini Kopyala</button>
-        <button class="btn small" onclick="downloadOriginalPmExcel()">📥 Orijinal Excel'i İndir</button>
+        <button class="btn small" onclick="downloadCurrentPmExcel()">📥 Boş Excel Şablonunu İndir</button>
         <button class="btn small" onclick="clearPmDraft()">↺ Formu Sıfırla</button>
       </div>
     </div>
@@ -345,7 +345,6 @@ const PM_EQUIPMENT = [
     name: "Ana Pano, Dağıtım Panoları, Tali Panolar ve Aydınlatma Panoları",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Ana_Pano_Dagitim_Tali_ve_Aydinlatma_Panolari_Aylik_Bakim_Kontrol_Formu.xlsx",
     items: [
       "Pano içi ve dışının uygun yöntemle temizlenmesi, toz, nem ve korozyon kontrolünün yapılması.",
       "Pano kapak kilitlerinin, kapak contalarının, kablo rakorlarının ve gövde sızdırmazlığının kontrol edilmesi.",
@@ -370,7 +369,6 @@ const PM_EQUIPMENT = [
     name: "ITW Dikey Dolum Makinesi",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "ITW_Dikey_Dolum_Makinesi_Aylik_Bakim_Kontrol_Formu-v4.xlsx",
     items: [
       "Pnömatik hava hazırlama ünitesinin genel durumunun, basınç ayarının ve filtre grubunun kontrol edilmesi.",
       "Elektrik panosu içerisinin uygun yöntemle temizlenmesi.",
@@ -392,10 +390,9 @@ const PM_EQUIPMENT = [
   },
   {
     code: "ITW-VAKUM",
-    name: "ITW Vakum Dedektörü / Makinesi",
+    name: "ITW Vakum Makinesi",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "ITW_Vakum_Dedektoru_Aylik_Bakim_Kontrol_Formu-v2.xlsx",
     items: [
       "Vakum haznesi ve kapak emniyet switch/sensörlerinin çalışmasının kontrol edilmesi.",
       "Rezistans/yapıştırma çeneleri ve sıcaklık kontrol devresinin kontrol edilmesi.",
@@ -413,7 +410,6 @@ const PM_EQUIPMENT = [
     name: "Jeneratör 1 ve Jeneratör 2",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Jeneratör_kontrol_form_güncel.xlsx",
     items: [
       "Jeneratör odası ve kabin/ünite genel temizliği, havalandırma panjurları ve sızıntı kontrolünün yapılması.",
       "Marş aküleri, kutup başları, şarj alternatörü ve akü redresör/şarj cihazı kontrolünün yapılması.",
@@ -435,7 +431,6 @@ const PM_EQUIPMENT = [
     name: "Kazan Dairesi",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Kazan_Dairesi_Aylik_Bakim_Kontrol_Formu_.xlsx",
     items: [
       "Kazan kontrol panosu, sigorta, kontaktör, röle ve klemens sıkılık/ısınma kontrolünün yapılması.",
       "Brülör ateşleme, alev sensörü, yakıt selenoidleri ve emniyet zinciri fonksiyon kontrolünün yapılması.",
@@ -453,7 +448,6 @@ const PM_EQUIPMENT = [
     name: "Kompanzasyon Panosu",
     periodLabel: "3 Aylık",
     periodDays: 90,
-    originalExcelFile: "Kompanzasyon_Panosu_3_Aylik_Bakim_Kontrol_Formu-Yatay-v3.xlsx",
     items: [
       "Kompanzasyon panosu içi ve dışının temizlenmesi, toz/nem kontrolü ve pano soğutma fanlarının kontrol edilmesi.",
       "Reaktif güç kontrol rölesinin ayarlarının, CT yön/oran değerlerinin ve güç faktörü (cos φ) okumalarının kontrol edilmesi.",
@@ -474,7 +468,6 @@ const PM_EQUIPMENT = [
     name: "Kompresör (Atlas Copco GA30 / GA45 VSD)",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Kompresor_Aylik_Bakim_Kontrol_Listesi.xlsx",
     items: [
       "Kompresör kabin içi ve elektrik/sürücü bölmesinin temizlenmesi, toz ve yağ/nem kalıntılarının kontrol edilmesi.",
       "VSD sürücü ve kontrol kartı soğutma fanları, hava filtreleri ve klemens/baraların gevşeklik ve ısınma kontrolünün yapılması.",
@@ -493,7 +486,6 @@ const PM_EQUIPMENT = [
     name: "Langguth Etiketleme Makinesi",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Langguth_Etiketleme_Makinesi_Aylik_Bakim_Kontrol_Formu.xlsx",
     items: [
       "Elektrik panosu içi temizliği, sürücü/inverter ve klemens bağlantılarının kontrol edilmesi.",
       "Etiket algılama sensörleri, ürün giriş/çıkış sensörleri ve reflektörlerin temizlik ve hassasiyet ayarının yapılması.",
@@ -506,10 +498,9 @@ const PM_EQUIPMENT = [
   },
   {
     code: "MARMAK-VAKUM",
-    name: "Marmak Vakum Dedektörü / Makinesi",
+    name: "Marmak Vakum Makinesi",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Marmak_Vakum_Dedektoru_Aylik_Bakim_Kontrol_Formu-v2.xlsx",
     items: [
       "Kontrol panosu içi temizliği, kontaktör, röle, zaman/sıcaklık kontrol cihazı ve klemens sıkılığının kontrol edilmesi.",
       "Kapak emniyet switch/sensörleri ve acil stop fonksiyon testinin yapılması.",
@@ -522,10 +513,9 @@ const PM_EQUIPMENT = [
   },
   {
     code: "MAURER-NORDSON",
-    name: "Maurer Koli Makinesi & Nordson Tutkal Sistemi",
+    name: "Maurer Kartonlama & Nordson Tutkal Sistemi",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Maurer_Koli_Makinesi_Nordson_Aylik_Bakim_Kontrol_Formu-v2.xlsx",
     items: [
       "Maurer elektrik panosu içi temizliği, PLC/giriş-çıkış modülleri, sürücüler ve klemens sıkılığının kontrol edilmesi.",
       "Karton açma, katlama ve itici istasyon sensörleri ile pnömatik valf/sensör bağlantılarının kontrol edilmesi.",
@@ -542,7 +532,6 @@ const PM_EQUIPMENT = [
     name: "Michanox Tünel Pastörizatör",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Michanox_Tunel_Pastorizator_Aylik_Bakim_Kontrol_Formu-v4.xlsx",
     items: [
       "Kontrol ve güç panolarının temizliği, nem/buhar sızıntısı kontrolü, klemens sıkılığı ve kontaktör/termik kontrolünün yapılması.",
       "Pastörizasyon bölge sıcaklık sensörleri (PT100/termokupl), vana aktüatörleri ve sirkülasyon pompalarının kontrol edilmesi.",
@@ -556,10 +545,9 @@ const PM_EQUIPMENT = [
   },
   {
     code: "SALAMURA-ODASI",
-    name: "Salamura Hazırlama Odası ve Panosu",
+    name: "Salamura Odası",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Salamura_Hazirlama_Odasi_ve_Panosu_Aylik_Bakim_Kontrol_Formu-v4.xlsx",
     items: [
       "Nem ve tuzlu ortam nedeniyle pano kapak contaları, rakorlar ve metal gövdelerde korozyon/oksitlenme kontrolünün yapılması.",
       "Salamura transfer/karıştırma pompaları, şamandıra/seviye sensörleri ve kumanda buton kutularının sızdırmazlık ve çalışma kontrolü.",
@@ -576,7 +564,6 @@ const PM_EQUIPMENT = [
     name: "Soğutma Odaları (1, 2, 3 ve 4)",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Sogutma_Odalari_1_2_3_4_Aylik_Bakim_Kontrol_Formu-v5.xlsx",
     items: [
       "Soğutma odaları 1–4 evaporatör ve kondenser fan motorlarının elektriksel bağlantıları, dönüş yönü ve çalışma kontrolü.",
       "Defrost rezistansları, defrost termostat/sensörleri ve drenaj ısıtıcı/hatlarının elektriksel kontrolünün yapılması.",
@@ -592,10 +579,9 @@ const PM_EQUIPMENT = [
   },
   {
     code: "OTOKLAV",
-    name: "Steriflow ve Stock Otoklav",
+    name: "Otoklav",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Steriflow_ve_Stock_Otoklav_Aylik_Bakim_Kontrol_Formu-Tek_Liste.xlsx",
     items: [
       "Otoklav kontrol panosu içi temizliği, röle/PLC/kontrol cihazı, kontaktör ve klemens sıkılığının kontrol edilmesi.",
       "Kapak kilitleme emniyet switch/sensörleri ve basınç/sıcaklık emniyet kilitlemelerinin fonksiyon testinin yapılması.",
@@ -609,15 +595,14 @@ const PM_EQUIPMENT = [
   },
   {
     code: "TUZ-HAVUZU",
-    name: "Tuz Havuzu ve Tuzlu Su Hazırlama Tankları",
+    name: "Tuz Havuzu",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "Tuz_Havuzu_ve_Tuzlu_Su_Hazirlama_Tanklari_Aylik_Bakim_Kontrol_Formu-v5.xlsx",
     items: [
       "Tuz havuzu elektrik panosu ve saha kumanda kutularının korozyon, nem ve kapak sızdırmazlık kontrolünün yapılması.",
       "Pompa, karıştırıcı veya dozaj ekipmanlarının motor koruma şalteri/termik ve klemens bağlantılarının kontrol edilmesi.",
       "Seviye sensörleri/şamandıralar ve kablolarının sağlamlık ile çalışma kontrolünün yapılması.",
-      "Kaçak akım koruma rölesi test butonunun çalıştırılması ve topraklama bağlantılarının kontrol edilmesi."
+      "Kaçak akım koruma rölesi test butonunun ve topraklama bağlantılarının kontrol edilmesi."
     ],
     metrics: [
       { key: "pool_temp_c", label: "Havuz Sıcaklığı (°C)", placeholder: "Örn: 16 °C" },
@@ -629,7 +614,6 @@ const PM_EQUIPMENT = [
     name: "X-RAY Kontrol Sistemi",
     periodLabel: "Aylık",
     periodDays: 30,
-    originalExcelFile: "X-RAY_Aylik_Bakim_Kontrol_Listesi.xlsx",
     items: [
       "X-RAY tüp/jeneratör kabini, dedektör hattı ve elektrik panosu iç temizliği ile fan/hava akışı kontrolünün yapılması.",
       "Kurşun perde/sızdırmazlık saçları, radyasyon ikaz lambaları ve kapı emniyet switchlerinin kontrol edilmesi.",
@@ -843,7 +827,6 @@ function evaluateMachineSchedule(eq) {
   const logs = getMachineLogs(eq.code);
   const latestDone = logs.find(r => r.status === "Biten");
   const latestWaitingRecord = logs.find(r => r.status === "Bekleyen (Malzeme Bekliyor)");
-  // A waiting entry is active only when it is newer than the latest completed maintenance.
   const latestWaiting = latestWaitingRecord &&
     (!latestDone || comparePmLogRecency(latestWaitingRecord, latestDone) < 0)
       ? latestWaitingRecord
@@ -1005,7 +988,6 @@ function renderPmFormForActive() {
       <div class="muted" style="margin-top:4px">
         Periyot: <strong>${esc(eq.periodLabel)}</strong> · Son Bakım: <strong>${lastDoneText}</strong> · Sonraki Planlı Bakım: <strong>${nextDueText}</strong>
       </div>
-      <div class="muted" style="margin-top:4px">Orijinal Excel Dosyası: <strong>${esc(eq.originalExcelFile || "-")}</strong></div>
       ${st.latestWaiting ? `<div class="muted" style="margin-top:4px;color:#7C2D12"><strong>Bekleyen Malzeme Notu:</strong> ${esc(st.latestWaiting.missingMaterial || "-")}</div>` : ""}
     </div>
     <span class="pm-status-pill ${st.pillClass}">${esc(st.label)}</span>
@@ -1161,38 +1143,34 @@ function copyCurrentPmQrLink() {
   }
 }
 
-/* GitHub deposundaki orijinal .xlsx dosyasını doğrudan indirir */
-function downloadOriginalPmExcel() {
-  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
-  const fileName = eq.originalExcelFile;
-  if (!fileName) {
-    alert("Bu ekipman için tanımlı orijinal Excel dosya adı bulunamadı.");
+function downloadCurrentPmExcel() {
+  if (typeof XLSX === "undefined") {
+    alert("Excel kütüphanesi yüklenemedi.");
     return;
   }
-  const encodedUrl = encodeURI(fileName);
-  fetch(encodedUrl)
-    .then(res => {
-      if (!res.ok) throw new Error("Dosya bulunamadı");
-      return res.blob();
-    })
-    .then(blob => {
-      const a = document.createElement("a");
-      const objectUrl = URL.createObjectURL(blob);
-      a.href = objectUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
-    })
-    .catch(() => {
-      const a = document.createElement("a");
-      a.href = encodedUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    });
+  const eq = PM_BY_CODE[activePmCode] || PM_EQUIPMENT[0];
+  const rows = [
+    ["EKİPMAN / PANO", `${eq.code} - ${eq.name}`],
+    ["BÖLÜM", "Elektrik"],
+    ["PERİYOT", eq.periodLabel],
+    [],
+    ["SIRA", "KONTROL MADDESİ", "DURUM (OK / NOK / -)"]
+  ];
+  eq.items.forEach((txt, idx) => rows.push([idx + 1, txt, ""]));
+  rows.push([], ["ÖLÇÜM / DEĞER ALANLARI", "DEĞER"]);
+  (eq.metrics || []).forEach(m => rows.push([m.label, ""]));
+  rows.push(
+    [],
+    ["EKSİK MALZEME / SİPARİŞ NOTU", ""],
+    ["TESPİT EDİLEN BULGULAR / YAPILAN İŞLEMLER", ""],
+    ["KONTROL EDEN (AD SOYAD)", ""],
+    ["TARİH", ""]
+  );
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws["!cols"] = [{ wch: 42 }, { wch: 72 }, { wch: 24 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Kontrol_Listesi");
+  XLSX.writeFile(wb, `${eq.code}_Planli_Bakim_Formu.xlsx`);
 }
 
 /* Arıza Takip & Pano */
