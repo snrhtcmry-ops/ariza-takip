@@ -62,6 +62,28 @@ textarea{resize:vertical;min-height:92px}.input:focus,select:focus,textarea:focu
 .modal{position:fixed;inset:0;background:#0f172acc;display:flex;align-items:center;justify-content:center;padding:18px;z-index:1000}.modal-box{background:var(--panel);border-radius:18px;padding:22px;width:min(540px,100%);max-height:90vh;overflow:auto;box-shadow:0 20px 60px #0003}.modal img{max-width:100%;max-height:78vh;display:block;margin:auto}
 @media(max-width:700px){.container{padding:10px;gap:11px}.card{padding:16px}.brand-logo{height:32px;max-width:125px}.header h1{font-size:1rem}.nav{width:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.nav .navbtn{min-width:0;min-height:44px;padding:8px 4px;font-size:.78rem;line-height:1.2;text-align:center}.counter-grid{grid-template-columns:repeat(3,1fr)}.counter strong{font-size:1.75rem}}
 @media(max-width:540px){.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.counter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.submit{min-height:54px}}
+
+/* Premium button refinement — CSS only */
+.btn,.navbtn,.counter,.photo-box{position:relative;isolation:isolate;overflow:hidden}
+.btn{border:1px solid rgba(117,139,163,.42);border-radius:12px;padding:10px 16px;min-height:42px;font-weight:720;letter-spacing:.12px;background:linear-gradient(180deg,#fff 0%,#edf2f7 52%,#e2e9f1 100%);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 3px 7px rgba(15,35,55,.09),0 1px 2px rgba(15,35,55,.05);transition:transform .16s ease,box-shadow .18s ease,border-color .18s ease,filter .18s ease}
+.btn::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.32),transparent 42%);opacity:.7}
+.btn:hover{transform:translateY(-2px);border-color:#9aafc5;box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 8px 18px rgba(18,38,60,.15),0 2px 4px rgba(18,38,60,.07);filter:saturate(1.06)}
+.btn:active{transform:translateY(0) scale(.985);box-shadow:0 1px 2px rgba(18,38,60,.12)}
+.btn.primary,.btn.success,.btn.danger,.btn.st-islem,.btn.st-parca,.btn.st-servis,.btn.st-tamam,.submit{color:#fff;border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 4px 12px rgba(12,30,48,.18)}
+.btn.primary{background:linear-gradient(145deg,#315f88,#183650)}.btn.success{background:linear-gradient(145deg,#36a373,#1d714c)}.btn.danger{background:linear-gradient(145deg,#e06464,#b53737)}
+.btn.st-islem{background:linear-gradient(145deg,#4b8bd5,#2864a8)}.btn.st-parca{background:linear-gradient(145deg,#e1824c,#bd5828)}.btn.st-servis{background:linear-gradient(145deg,#9079ce,#6850a8)}.btn.st-tamam{background:linear-gradient(145deg,#36a373,#1d714c)}
+.btn.primary:hover,.btn.success:hover,.btn.danger:hover,.btn.st-islem:hover,.btn.st-parca:hover,.btn.st-servis:hover,.btn.st-tamam:hover,.submit:hover{filter:brightness(1.08);box-shadow:0 1px 0 rgba(255,255,255,.2) inset,0 9px 20px rgba(12,30,48,.24)}
+.btn.small{min-height:36px;padding:8px 12px;border-radius:10px;font-size:.82rem}
+.navbtn{border-radius:11px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.045));box-shadow:0 1px 0 rgba(255,255,255,.07) inset;transition:all .18s ease}
+.navbtn:hover{transform:translateY(-2px);background:linear-gradient(180deg,rgba(255,255,255,.19),rgba(255,255,255,.09));box-shadow:0 6px 14px rgba(0,0,0,.18)}
+.navbtn.active{background:linear-gradient(180deg,#fff,#dfe9f3);border-color:#fff;box-shadow:0 1px 0 #fff inset,0 5px 13px rgba(4,18,32,.24);font-weight:800}
+.tab{border-radius:12px}.tab.active{box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 15px rgba(15,35,55,.22)}
+.submit{background:linear-gradient(110deg,#142d47,#37678e);border-radius:15px;min-height:58px;letter-spacing:.55px;box-shadow:0 1px 0 rgba(255,255,255,.16) inset,0 8px 20px rgba(17,45,72,.25)}
+.submit:hover{transform:translateY(-2px);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 12px 25px rgba(17,45,72,.30)}
+.counter{border:1px solid rgba(255,255,255,.3);box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 7px 17px rgba(16,35,55,.14)}
+.counter:hover{transform:translateY(-3px);box-shadow:0 1px 0 rgba(255,255,255,.2) inset,0 12px 24px rgba(16,35,55,.22)}
+.btn:disabled,.submit:disabled{opacity:.58;cursor:not-allowed;transform:none;filter:none;box-shadow:none}
+@media(prefers-reduced-motion:reduce){.btn,.navbtn,.counter{transition:none}}
 </style>
 </head>
 <body>
